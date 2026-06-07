@@ -25,3 +25,10 @@
 - [x] Add GPS & timestamp logging on form submission
 - [x] Auto-ground machine on critical fail
 - [x] Update inspection report to show phases and compliance data
+- [x] Add branded header bar with DiggerSafe logo and "FLEET & SAFETY" text
+- [x] Add search bar to Fleet screen
+- [x] Show serial numbers on machine cards
+- [x] Add "Due Soon" warning badge for machines approaching inspection due date
+- [x] Yellow border highlight on machines needing attention
+- [x] Restructure tabs to Fleet / Inspect / History (remove Settings tab, add Inspect)
+- [x] Polish overall UI to match base44 version quality

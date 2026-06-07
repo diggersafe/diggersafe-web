@@ -18,6 +18,12 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          textTransform: "uppercase",
+          letterSpacing: 0.5,
+        },
         tabBarStyle: {
           paddingTop: 8,
           paddingBottom: bottomPadding,
@@ -32,21 +38,28 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Fleet",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="construction" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="construction" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="inspect"
+        options={{
+          title: "Inspect",
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="clipboard.fill" color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: "History",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="clipboard.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={26} name="clock.fill" color={color} />,
         }}
       />
+      {/* Hide settings from tab bar - accessible from Fleet header */}
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Settings",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
+          href: null,
         }}
       />
     </Tabs>

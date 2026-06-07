@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { FlatList, Text, View, TouchableOpacity, RefreshControl } from "react-native";
+import { FlatList, Text, View, TouchableOpacity, RefreshControl, Platform } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -49,15 +49,15 @@ function InspectionRow({ inspection, onPress }: { inspection: Inspection; onPres
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: "600", color: colors.foreground }}>
+          <Text style={{ fontSize: 15, fontWeight: "600", color: colors.foreground }}>
             {inspection.assetId} — {inspection.makeModel}
           </Text>
-          <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
+          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
             {dateStr} • {inspection.inspector}
           </Text>
         </View>
         <View style={{ backgroundColor: resultColor + "20", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
-          <Text style={{ fontSize: 12, fontWeight: "600", color: resultColor }}>{resultLabel}</Text>
+          <Text style={{ fontSize: 11, fontWeight: "600", color: resultColor }}>{resultLabel}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -88,14 +88,52 @@ export default function HistoryScreen() {
   }, [loadInspections]);
 
   return (
-    <ScreenContainer className="px-4 pt-2">
-      <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 32, fontWeight: "800", color: colors.foreground }}>History</Text>
-        <Text style={{ fontSize: 14, color: colors.muted }}>
+    <ScreenContainer edges={["left", "right"]}>
+      {/* Branded Header */}
+      <View
+        style={{
+          backgroundColor: colors.surface,
+          paddingHorizontal: 16,
+          paddingTop: Platform.OS === "ios" ? 54 : 40,
+          paddingBottom: 14,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              backgroundColor: colors.primary,
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 10,
+            }}
+          >
+            <MaterialIcons name="construction" size={22} color="#1A1A1A" />
+          </View>
+          <View>
+            <Text style={{ fontSize: 18, fontWeight: "800", color: colors.foreground }}>
+              <Text style={{ color: colors.success }}>Digger</Text>Safe
+            </Text>
+            <Text style={{ fontSize: 10, color: colors.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>
+              Fleet & Safety
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Title */}
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
+        <Text style={{ fontSize: 28, fontWeight: "800", color: colors.foreground }}>History</Text>
+        <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
           {inspections.length} inspections completed
         </Text>
       </View>
 
+      {/* Inspection List */}
       {inspections.length === 0 ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingBottom: 100 }}>
           <MaterialIcons name="assignment" size={64} color={colors.muted + "40"} />
@@ -117,7 +155,7 @@ export default function HistoryScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
           }
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
         />
       )}
     </ScreenContainer>
