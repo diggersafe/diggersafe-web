@@ -5,7 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { getMachines, updateMachine, type Machine } from "@/lib/store";
+import { getMachines, updateMachine, type Machine, type MachineStatus } from "@/lib/store";
 
 export default function EditMachineScreen() {
   const colors = useColors();
@@ -15,7 +15,7 @@ export default function EditMachineScreen() {
   const [makeModel, setMakeModel] = useState("");
   const [serialNumber, setSerialNumber] = useState("");
   const [hourMeter, setHourMeter] = useState("");
-  const [status, setStatus] = useState<"active" | "retired">("active");
+  const [status, setStatus] = useState<MachineStatus>("active");
   const [saving, setSaving] = useState(false);
 
   useFocusEffect(

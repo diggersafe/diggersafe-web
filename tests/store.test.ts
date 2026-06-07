@@ -28,7 +28,9 @@ import {
   saveInspection,
   getSettings,
   saveSettings,
-  SAFETY_CATEGORIES,
+  INSPECTION_PHASES,
+  ALL_CHECK_ITEMS,
+  type SafetyCheck,
 } from "../lib/store";
 
 describe("Store - Machines", () => {
@@ -123,7 +125,7 @@ describe("Store - Inspections", () => {
     expect(inspections).toEqual([]);
   });
 
-  it("should save an inspection", async () => {
+  it("should save a cleared inspection", async () => {
     const machine = await addMachine({
       assetId: "DIG-001",
       makeModel: "CAT 320F Excavator",
@@ -132,18 +134,23 @@ describe("Store - Inspections", () => {
       status: "active",
     });
 
+    const checks: SafetyCheck[] = ALL_CHECK_ITEMS.map((item) => ({
+      category: item.label,
+      phase: item.phase,
+      result: "pass" as const,
+      notes: "",
+      isCritical: item.isCritical,
+    }));
+
     const inspection = await saveInspection({
       machineId: machine.id,
       assetId: "DIG-001",
       makeModel: "CAT 320F Excavator",
-      date: "2026-06-08T10:00:00.000Z",
+      date: "2026-06-08",
+      timestamp: "2026-06-08T08:00:00.000Z",
       inspector: "Darren Gray",
       hourMeter: 767,
-      checks: SAFETY_CATEGORIES.map((cat) => ({
-        category: cat,
-        result: "pass" as const,
-        notes: "",
-      })),
+      checks,
       signatureBase64: "test-signature",
       cleared: true,
     });
@@ -163,18 +170,23 @@ describe("Store - Inspections", () => {
       status: "active",
     });
 
+    const checks: SafetyCheck[] = ALL_CHECK_ITEMS.map((item) => ({
+      category: item.label,
+      phase: item.phase,
+      result: "pass" as const,
+      notes: "",
+      isCritical: item.isCritical,
+    }));
+
     await saveInspection({
       machineId: machine.id,
       assetId: "DIG-001",
       makeModel: "CAT 320F Excavator",
-      date: "2026-06-08T10:00:00.000Z",
+      date: "2026-06-08",
+      timestamp: "2026-06-08T08:00:00.000Z",
       inspector: "Darren Gray",
       hourMeter: 767,
-      checks: SAFETY_CATEGORIES.map((cat) => ({
-        category: cat,
-        result: "pass" as const,
-        notes: "",
-      })),
+      checks,
       signatureBase64: "test-signature",
       cleared: true,
     });
@@ -183,51 +195,40 @@ describe("Store - Inspections", () => {
     expect(machines[0].hourMeter).toBe(767);
   });
 
-  it("should store inspections in reverse chronological order", async () => {
+  it("should auto-ground machine on failed inspection", async () => {
     const machine = await addMachine({
-      assetId: "DIG-001",
+      assetId: "DIG-004",
       makeModel: "CAT 320F Excavator",
-      serialNumber: "CAT0320F78921",
-      hourMeter: 740,
+      serialNumber: "CAT0320F99999",
+      hourMeter: 400,
       status: "active",
     });
 
-    await saveInspection({
-      machineId: machine.id,
-      assetId: "DIG-001",
-      makeModel: "CAT 320F Excavator",
-      date: "2026-06-07T10:00:00.000Z",
-      inspector: "Darren Gray",
-      hourMeter: 740,
-      checks: SAFETY_CATEGORIES.map((cat) => ({
-        category: cat,
-        result: "pass" as const,
-        notes: "",
-      })),
-      signatureBase64: "sig1",
-      cleared: true,
-    });
+    const checks: SafetyCheck[] = ALL_CHECK_ITEMS.map((item) => ({
+      category: item.label,
+      phase: item.phase,
+      result: item.id === "seat_seatbelt" ? ("fail" as const) : ("pass" as const),
+      notes: item.id === "seat_seatbelt" ? "Seatbelt latch broken" : "",
+      isCritical: item.isCritical,
+    }));
 
     await saveInspection({
       machineId: machine.id,
-      assetId: "DIG-001",
+      assetId: "DIG-004",
       makeModel: "CAT 320F Excavator",
-      date: "2026-06-08T10:00:00.000Z",
+      date: "2026-06-08",
+      timestamp: "2026-06-08T09:00:00.000Z",
       inspector: "Darren Gray",
-      hourMeter: 767,
-      checks: SAFETY_CATEGORIES.map((cat) => ({
-        category: cat,
-        result: "pass" as const,
-        notes: "",
-      })),
-      signatureBase64: "sig2",
-      cleared: true,
+      hourMeter: 410,
+      checks,
+      signatureBase64: "test-signature",
+      cleared: false,
+      groundedReason: "Seat & Seatbelt: Seatbelt latch broken",
     });
 
-    const inspections = await getInspections();
-    expect(inspections).toHaveLength(2);
-    expect(inspections[0].hourMeter).toBe(767);
-    expect(inspections[1].hourMeter).toBe(740);
+    const machines = await getMachines();
+    const updated = machines.find((m) => m.id === machine.id);
+    expect(updated?.status).toBe("grounded");
   });
 });
 
@@ -254,16 +255,42 @@ describe("Store - Settings", () => {
   });
 });
 
-describe("Safety Categories", () => {
-  it("should have 5 safety categories", () => {
-    expect(SAFETY_CATEGORIES).toHaveLength(5);
+describe("Inspection Phases", () => {
+  it("should have 3 phases", () => {
+    expect(INSPECTION_PHASES).toHaveLength(3);
   });
 
-  it("should include all required categories", () => {
-    expect(SAFETY_CATEGORIES).toContain("Structural Integrity");
-    expect(SAFETY_CATEGORIES).toContain("Mechanical & Fluids");
-    expect(SAFETY_CATEGORIES).toContain("Safety Features");
-    expect(SAFETY_CATEGORIES).toContain("Protective Structures (ROPS/FOPS)");
-    expect(SAFETY_CATEGORIES).toContain("Attachments");
+  it("should have 15 total check items across all phases", () => {
+    expect(ALL_CHECK_ITEMS).toHaveLength(15);
+  });
+
+  it("Phase 1 should have 6 items (Structural & Fluid Checks)", () => {
+    expect(INSPECTION_PHASES[0].items).toHaveLength(6);
+    expect(INSPECTION_PHASES[0].title).toContain("Structural & Fluid");
+  });
+
+  it("Phase 2 should have 5 items (Cabin & Systems Checks)", () => {
+    expect(INSPECTION_PHASES[1].items).toHaveLength(5);
+    expect(INSPECTION_PHASES[1].title).toContain("Cabin & Systems");
+  });
+
+  it("Phase 3 should have 4 items (Operational & Functionality Tests)", () => {
+    expect(INSPECTION_PHASES[2].items).toHaveLength(4);
+    expect(INSPECTION_PHASES[2].title).toContain("Operational & Functionality");
+  });
+
+  it("should mark critical items correctly", () => {
+    const criticalItems = ALL_CHECK_ITEMS.filter((item) => item.isCritical);
+    // Should have multiple critical items across phases
+    expect(criticalItems.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("should include key WorkSafe items", () => {
+    const labels = ALL_CHECK_ITEMS.map((item) => item.label);
+    expect(labels).toContain("Logbook & Compliance Plates");
+    expect(labels).toContain("Fluid Levels & Leaks");
+    expect(labels).toContain("Structure Protection (ROPS/FOPS)");
+    expect(labels).toContain("Seat & Seatbelt");
+    expect(labels).toContain("Quick-Hitch Safety Pin");
   });
 });

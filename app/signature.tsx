@@ -1,16 +1,15 @@
-import { useRef, useState } from "react";
-import { Text, View, TouchableOpacity, Platform, Dimensions } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Text, View, TouchableOpacity, Platform, Dimensions, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { useSharedValue, useAnimatedProps, runOnJS } from "react-native-reanimated";
 import Svg, { Path } from "react-native-svg";
+import * as Location from "expo-location";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { saveInspection } from "@/lib/store";
+import { saveInspection, type InspectionLocation } from "@/lib/store";
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CANVAS_WIDTH = SCREEN_WIDTH - 32;
 const CANVAS_HEIGHT = 200;
@@ -22,26 +21,45 @@ export default function SignatureScreen() {
   const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState<"pending" | "acquired" | "denied" | "error">("pending");
+  const [location, setLocation] = useState<InspectionLocation | undefined>(undefined);
 
   const hasSignature = paths.length > 0 || currentPath.length > 0;
 
-  const updateCurrentPath = (path: string) => {
-    setCurrentPath(path);
-  };
-
-  const finishPath = (path: string) => {
-    if (path) {
-      setPaths((prev) => [...prev, path]);
-      setCurrentPath("");
-    }
-  };
+  // Request GPS location on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        if (Platform.OS === "web" && !window.navigator.geolocation) {
+          setGpsStatus("error");
+          return;
+        }
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setGpsStatus("denied");
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+        setLocation({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+          accuracy: loc.coords.accuracy ?? undefined,
+        });
+        setGpsStatus("acquired");
+      } catch {
+        setGpsStatus("error");
+      }
+    })();
+  }, []);
 
   const pan = Gesture.Pan()
     .runOnJS(true)
     .onStart((e) => {
       const x = Math.min(Math.max(e.x, 0), CANVAS_WIDTH);
       const y = Math.min(Math.max(e.y, 0), CANVAS_HEIGHT);
-      updateCurrentPath(`M${x},${y}`);
+      setCurrentPath(`M${x},${y}`);
     })
     .onUpdate((e) => {
       const x = Math.min(Math.max(e.x, 0), CANVAS_WIDTH);
@@ -49,7 +67,10 @@ export default function SignatureScreen() {
       setCurrentPath((prev) => `${prev} L${x},${y}`);
     })
     .onEnd(() => {
-      finishPath(currentPath);
+      if (currentPath) {
+        setPaths((prev) => [...prev, currentPath]);
+        setCurrentPath("");
+      }
     });
 
   const handleClear = () => {
@@ -59,12 +80,36 @@ export default function SignatureScreen() {
 
   const handleSubmit = async () => {
     if (!inspectionData || !hasSignature) return;
+
+    // Warn if GPS not acquired
+    if (gpsStatus !== "acquired") {
+      Alert.alert(
+        "GPS Not Available",
+        "Location data could not be captured. The inspection will still be saved without GPS coordinates. Continue?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Continue", onPress: () => doSubmit() },
+        ]
+      );
+      return;
+    }
+
+    doSubmit();
+  };
+
+  const doSubmit = async () => {
     setSubmitting(true);
 
     try {
       const inspection = JSON.parse(inspectionData);
       // Store signature as SVG path data (lightweight)
       inspection.signatureBase64 = JSON.stringify([...paths, currentPath].filter(Boolean));
+      // Record exact timestamp at moment of submission
+      inspection.timestamp = new Date().toISOString();
+      // Attach GPS location
+      if (location) {
+        inspection.location = location;
+      }
 
       const saved = await saveInspection(inspection);
 
@@ -79,6 +124,7 @@ export default function SignatureScreen() {
       });
     } catch (e) {
       setSubmitting(false);
+      Alert.alert("Error", "Failed to save inspection. Please try again.");
     }
   };
 
@@ -96,11 +142,52 @@ export default function SignatureScreen() {
         </TouchableOpacity>
 
         <Text style={{ fontSize: 24, fontWeight: "800", color: colors.foreground, marginBottom: 4 }}>
-          Signature
+          Digital Signature
         </Text>
-        <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 20 }}>
-          Sign below to confirm the inspection
+        <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 16 }}>
+          Sign below to verify accountability and submit the inspection
         </Text>
+
+        {/* WorkSafe Compliance Info */}
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: 10,
+            padding: 12,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}
+        >
+          <Text style={{ fontSize: 11, fontWeight: "700", color: colors.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
+            Auto-Recorded Compliance Data
+          </Text>
+          <View style={{ gap: 4 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <MaterialIcons name="access-time" size={14} color={colors.muted} />
+              <Text style={{ fontSize: 12, color: colors.foreground }}>
+                Timestamp: {new Date().toLocaleString()}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <MaterialIcons
+                name="location-on"
+                size={14}
+                color={gpsStatus === "acquired" ? colors.success : gpsStatus === "pending" ? colors.warning : colors.error}
+              />
+              <Text style={{ fontSize: 12, color: colors.foreground }}>
+                GPS:{" "}
+                {gpsStatus === "acquired" && location
+                  ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`
+                  : gpsStatus === "pending"
+                  ? "Acquiring..."
+                  : gpsStatus === "denied"
+                  ? "Permission denied"
+                  : "Unavailable"}
+              </Text>
+            </View>
+          </View>
+        </View>
 
         {/* Signature Canvas */}
         <View
@@ -110,8 +197,8 @@ export default function SignatureScreen() {
             height: CANVAS_HEIGHT,
             overflow: "hidden",
             borderWidth: 2,
-            borderColor: colors.border,
-            borderStyle: "dashed",
+            borderColor: hasSignature ? colors.primary + "60" : colors.border,
+            borderStyle: hasSignature ? "solid" : "dashed",
             marginBottom: 12,
           }}
         >

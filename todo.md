@@ -18,3 +18,10 @@
 - [ ] Share/Email report functionality
 - [x] Generate app logo and branding
 - [ ] Polish UI and haptic feedback
+- [x] Switch to dark theme as default
+- [x] Rebuild inspection with 3-phase structure (Engine OFF, Engine ON, Moving)
+- [x] Add 15 specific WorkSafe check items across 3 phases
+- [x] Implement No-Go action plan (forced comment + photo on critical fail)
+- [x] Add GPS & timestamp logging on form submission
+- [x] Auto-ground machine on critical fail
+- [x] Update inspection report to show phases and compliance data

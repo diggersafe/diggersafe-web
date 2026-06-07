@@ -9,10 +9,18 @@ import { getMachines, type Machine } from "@/lib/store";
 
 function StatusBadge({ status }: { status: string }) {
   const colors = useColors();
-  const isActive = status === "active";
-  const bgColor = isActive ? colors.success + "20" : colors.muted + "20";
-  const textColor = isActive ? colors.success : colors.muted;
-  const label = isActive ? "Active" : "Retired";
+  const bgColor =
+    status === "active" ? colors.success + "20" :
+    status === "grounded" ? colors.error + "20" :
+    colors.muted + "20";
+  const textColor =
+    status === "active" ? colors.success :
+    status === "grounded" ? colors.error :
+    colors.muted;
+  const label =
+    status === "active" ? "Active" :
+    status === "grounded" ? "Grounded" :
+    "Retired";
 
   return (
     <View style={{ backgroundColor: bgColor, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 }}>

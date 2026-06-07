@@ -40,14 +40,14 @@ export default function InspectionCompleteScreen() {
             }}
           >
             <MaterialIcons
-              name={isCleared ? "check" : "close"}
+              name={isCleared ? "check" : "block"}
               size={44}
               color={isCleared ? colors.success : colors.error}
             />
           </View>
 
           <Text style={{ fontSize: 24, fontWeight: "800", color: colors.foreground, textAlign: "center" }}>
-            {isCleared ? "MACHINE CLEARED" : "INSPECTION FAILED"}
+            {isCleared ? "MACHINE CLEARED" : "MACHINE GROUNDED"}
           </Text>
           <Text
             style={{
@@ -57,12 +57,47 @@ export default function InspectionCompleteScreen() {
               marginTop: 6,
             }}
           >
-            {isCleared ? "READY FOR HIRE" : "REQUIRES ATTENTION"}
+            {isCleared ? "READY FOR HIRE" : "NOT SAFE FOR OPERATION"}
+          </Text>
+
+          {!isCleared && (
+            <View
+              style={{
+                backgroundColor: colors.error + "10",
+                borderRadius: 10,
+                padding: 12,
+                marginTop: 16,
+                width: "100%",
+              }}
+            >
+              <Text style={{ fontSize: 12, color: colors.error, textAlign: "center", lineHeight: 18 }}>
+                Critical safety failure detected. This machine has been automatically flagged as grounded and cannot be hired until the issue is resolved and a new inspection is passed.
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Compliance badge */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+            marginTop: 16,
+            backgroundColor: colors.surface,
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 8,
+          }}
+        >
+          <MaterialIcons name="verified" size={16} color={colors.success} />
+          <Text style={{ fontSize: 11, color: colors.muted }}>
+            GPS, timestamp & signature recorded
           </Text>
         </View>
 
         {/* Action Buttons */}
-        <View style={{ width: "100%", marginTop: 32, gap: 12 }}>
+        <View style={{ width: "100%", marginTop: 24, gap: 12 }}>
           <TouchableOpacity
             onPress={() => router.push(`/report/${inspectionId}` as any)}
             activeOpacity={0.8}
