@@ -5,7 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { getMachines, deleteMachine, getInspections, type Machine, type Inspection } from "@/lib/store";
+import { getMachines, deleteMachine, getInspections, getServiceRecordsForMachine, type Machine, type Inspection, type ServiceRecord, SERVICE_TYPE_LABELS } from "@/lib/store";
 
 export default function MachineDetailScreen() {
   const colors = useColors();
@@ -13,6 +13,7 @@ export default function MachineDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [machine, setMachine] = useState<Machine | null>(null);
   const [lastInspection, setLastInspection] = useState<Inspection | null>(null);
+  const [serviceRecords, setServiceRecords] = useState<ServiceRecord[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -26,6 +27,9 @@ export default function MachineDetailScreen() {
         if (machineInspections.length > 0) {
           setLastInspection(machineInspections[0]);
         }
+
+        const services = await getServiceRecordsForMachine(id!);
+        setServiceRecords(services);
       })();
     }, [id])
   );
@@ -191,6 +195,66 @@ export default function MachineDetailScreen() {
             Start Pre-Hire Check
           </Text>
         </TouchableOpacity>
+
+        {/* Log Service Button */}
+        <TouchableOpacity
+          onPress={() => router.push(`/add-service/${machine.id}` as any)}
+          activeOpacity={0.8}
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: 14,
+            padding: 16,
+            alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 8,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}
+        >
+          <MaterialIcons name="build" size={20} color={colors.primary} />
+          <Text style={{ fontSize: 16, fontWeight: "700", color: colors.primary }}>
+            Log Service
+          </Text>
+        </TouchableOpacity>
+
+        {/* Service History */}
+        {serviceRecords.length > 0 && (
+          <View
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: 16,
+              padding: 18,
+              marginBottom: 16,
+              borderWidth: 1,
+              borderColor: colors.border,
+            }}
+          >
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.muted, marginBottom: 12, textTransform: "uppercase" }}>
+              Service History
+            </Text>
+            {serviceRecords.slice(0, 5).map((record, index) => (
+              <View key={record.id} style={{ marginBottom: index < serviceRecords.length - 1 ? 12 : 0 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <Text style={{ fontSize: 14, fontWeight: "600", color: colors.foreground }}>
+                    {SERVICE_TYPE_LABELS[record.serviceType]}
+                  </Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>
+                    {new Date(record.date).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" })}
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
+                  {record.hourMeter} hrs • {record.technician}
+                  {record.nextServiceHours ? ` • Next: ${record.nextServiceHours} hrs` : ""}
+                </Text>
+                {index < serviceRecords.slice(0, 5).length - 1 && (
+                  <View style={{ height: 1, backgroundColor: colors.border, marginTop: 12 }} />
+                )}
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Action Buttons */}
         <View style={{ flexDirection: "row", gap: 10 }}>

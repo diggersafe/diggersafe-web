@@ -4,6 +4,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
+import { AppHeader } from "@/components/app-header";
 import { useColors } from "@/hooks/use-colors";
 import { getMachines, getInspections, type Machine, type Inspection } from "@/lib/store";
 
@@ -54,41 +55,7 @@ export default function InspectScreen() {
 
   return (
     <ScreenContainer edges={["left", "right"]}>
-      {/* Branded Header */}
-      <View
-        style={{
-          backgroundColor: colors.surface,
-          paddingHorizontal: 16,
-          paddingTop: Platform.OS === "ios" ? 54 : 40,
-          paddingBottom: 14,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-        }}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              backgroundColor: colors.primary,
-              alignItems: "center",
-              justifyContent: "center",
-              marginRight: 10,
-            }}
-          >
-            <MaterialIcons name="construction" size={22} color="#1A1A1A" />
-          </View>
-          <View>
-            <Text style={{ fontSize: 18, fontWeight: "800", color: colors.foreground }}>
-              <Text style={{ color: colors.success }}>Digger</Text>Safe
-            </Text>
-            <Text style={{ fontSize: 10, color: colors.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>
-              Fleet & Safety
-            </Text>
-          </View>
-        </View>
-      </View>
+      <AppHeader />
 
       {/* Title */}
       <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>

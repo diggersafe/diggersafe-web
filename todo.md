@@ -32,3 +32,8 @@
 - [x] Yellow border highlight on machines needing attention
 - [x] Restructure tabs to Fleet / Inspect / History (remove Settings tab, add Inspect)
 - [x] Polish overall UI to match base44 version quality
+- [x] Fix header logo to use actual app icon image instead of MaterialIcons placeholder
+- [x] Add Service Records feature (maintenance tracking per machine)
+- [ ] Add service interval alerts based on hour meter readings
+- [x] Add PDF report generation and Share/Email button on inspection reports
+- [x] Add date filtering to History tab for finding old reports

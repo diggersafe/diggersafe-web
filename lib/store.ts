@@ -52,11 +52,39 @@ export interface AppSettings {
   companyName: string;
 }
 
+export type ServiceType = "engine_oil" | "hydraulic_oil" | "filters" | "tracks" | "greasing" | "coolant" | "general" | "other";
+
+export interface ServiceRecord {
+  id: string;
+  machineId: string;
+  assetId: string;
+  date: string;
+  serviceType: ServiceType;
+  description: string;
+  hourMeter: number;
+  nextServiceHours?: number; // Hour meter reading when next service is due
+  technician: string;
+  cost?: number;
+  notes?: string;
+}
+
+export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
+  engine_oil: "Engine Oil Change",
+  hydraulic_oil: "Hydraulic Oil Change",
+  filters: "Filter Replacement",
+  tracks: "Track Maintenance",
+  greasing: "Greasing",
+  coolant: "Coolant Flush",
+  general: "General Service",
+  other: "Other",
+};
+
 // ---- Storage Keys ----
 
 const MACHINES_KEY = "diggersafe_machines";
 const INSPECTIONS_KEY = "diggersafe_inspections";
 const SETTINGS_KEY = "diggersafe_settings";
+const SERVICES_KEY = "diggersafe_services";
 
 // ---- Default Data ----
 
@@ -310,4 +338,53 @@ export async function getSettings(): Promise<AppSettings> {
 
 export async function saveSettings(settings: AppSettings): Promise<void> {
   await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+}
+
+// ---- Service Record Functions ----
+
+export async function getServiceRecords(): Promise<ServiceRecord[]> {
+  try {
+    const data = await AsyncStorage.getItem(SERVICES_KEY);
+    if (data) return JSON.parse(data);
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getServiceRecordsForMachine(machineId: string): Promise<ServiceRecord[]> {
+  const records = await getServiceRecords();
+  return records.filter((r) => r.machineId === machineId);
+}
+
+export async function addServiceRecord(record: Omit<ServiceRecord, "id">): Promise<ServiceRecord> {
+  const records = await getServiceRecords();
+  const newRecord: ServiceRecord = {
+    ...record,
+    id: Date.now().toString(),
+  };
+  records.unshift(newRecord);
+  await AsyncStorage.setItem(SERVICES_KEY, JSON.stringify(records));
+  return newRecord;
+}
+
+export async function deleteServiceRecord(id: string): Promise<void> {
+  const records = await getServiceRecords();
+  const filtered = records.filter((r) => r.id !== id);
+  await AsyncStorage.setItem(SERVICES_KEY, JSON.stringify(filtered));
+}
+
+// Check if a machine is due for service based on hour meter
+export function isServiceDue(machine: Machine, serviceRecords: ServiceRecord[]): { due: boolean; serviceType?: string; hoursOverdue?: number } {
+  const machineRecords = serviceRecords.filter((r) => r.machineId === machine.id && r.nextServiceHours);
+  for (const record of machineRecords) {
+    if (record.nextServiceHours && machine.hourMeter >= record.nextServiceHours) {
+      return {
+        due: true,
+        serviceType: SERVICE_TYPE_LABELS[record.serviceType],
+        hoursOverdue: machine.hourMeter - record.nextServiceHours,
+      };
+    }
+  }
+  return { due: false };
 }

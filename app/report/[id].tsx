@@ -1,12 +1,103 @@
 import { useCallback, useState } from "react";
-import { Text, View, TouchableOpacity, ScrollView, Platform } from "react-native";
+import { Text, View, TouchableOpacity, ScrollView, Platform, Alert } from "react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Svg, { Path } from "react-native-svg";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { getInspections, INSPECTION_PHASES, type Inspection } from "@/lib/store";
+
+function generateReportHTML(inspection: Inspection): string {
+  const dateStr = new Date(inspection.date).toLocaleDateString("en-AU", {
+    day: "2-digit", month: "short", year: "numeric",
+  });
+  const timeStr = inspection.timestamp
+    ? new Date(inspection.timestamp).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    : "N/A";
+
+  let signatureSvg = "";
+  try {
+    const paths = JSON.parse(inspection.signatureBase64) as string[];
+    signatureSvg = paths.map(p => `<path d="${p}" stroke="#1A1A1A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />`).join("");
+  } catch {}
+
+  const checksHTML = INSPECTION_PHASES.map((phase) => {
+    const phaseChecks = inspection.checks.filter((c) => c.phase === phase.id);
+    if (phaseChecks.length === 0) return "";
+    return `
+      <h3 style="color:#E8B100;margin:16px 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">${phase.title}</h3>
+      <table style="width:100%;border-collapse:collapse;">
+        ${phaseChecks.map(check => `
+          <tr>
+            <td style="padding:6px 0;font-size:13px;color:#333;">${check.category}</td>
+            <td style="padding:6px 0;text-align:right;">
+              <span style="background:${check.result === "pass" ? "#e6f9e6" : "#fde8e8"};color:${check.result === "pass" ? "#22C55E" : "#EF4444"};padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">
+                ${check.result === "pass" ? "Pass" : "Fail"}
+              </span>
+            </td>
+          </tr>
+          ${check.result === "fail" && check.notes ? `<tr><td colspan="2" style="padding:2px 0 8px 12px;font-size:11px;color:#EF4444;font-style:italic;">Note: ${check.notes}</td></tr>` : ""}
+        `).join("")}
+      </table>
+    `;
+  }).join("");
+
+  return `
+    <html>
+    <head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+    <body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;max-width:600px;margin:0 auto;">
+      <div style="display:flex;align-items:center;margin-bottom:20px;">
+        <div>
+          <h1 style="margin:0;font-size:20px;"><span style="color:#22C55E;">Digger</span>Safe</h1>
+          <p style="margin:0;font-size:10px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">Fleet & Safety</p>
+        </div>
+        <div style="margin-left:auto;background:${inspection.cleared ? "#e6f9e6" : "#fde8e8"};padding:4px 12px;border-radius:6px;">
+          <span style="font-size:12px;font-weight:700;color:${inspection.cleared ? "#22C55E" : "#EF4444"};">${inspection.cleared ? "CLEARED" : "GROUNDED"}</span>
+        </div>
+      </div>
+
+      <table style="width:100%;margin-bottom:16px;">
+        <tr><td style="font-size:11px;color:#666;text-transform:uppercase;">Asset ID</td><td style="font-size:11px;color:#666;text-transform:uppercase;">Make/Model</td></tr>
+        <tr><td style="font-size:15px;font-weight:600;padding-bottom:8px;">${inspection.assetId}</td><td style="font-size:15px;padding-bottom:8px;">${inspection.makeModel}</td></tr>
+        <tr><td style="font-size:11px;color:#666;text-transform:uppercase;">Date</td><td style="font-size:11px;color:#666;text-transform:uppercase;">Inspector</td></tr>
+        <tr><td style="font-size:15px;padding-bottom:8px;">${dateStr}</td><td style="font-size:15px;padding-bottom:8px;">${inspection.inspector}</td></tr>
+        <tr><td style="font-size:11px;color:#666;text-transform:uppercase;">Hour Meter</td><td></td></tr>
+        <tr><td style="font-size:18px;font-weight:700;font-family:monospace;">${inspection.hourMeter} hrs</td><td></td></tr>
+      </table>
+
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+
+      ${checksHTML}
+
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+
+      <h3 style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">WorkSafe Compliance</h3>
+      <p style="font-size:12px;margin:4px 0;">Submitted: ${dateStr} at ${timeStr}</p>
+      <p style="font-size:12px;margin:4px 0;">GPS: ${inspection.location ? `${inspection.location.latitude.toFixed(5)}, ${inspection.location.longitude.toFixed(5)}` : "Not recorded"}</p>
+      <p style="font-size:12px;margin:4px 0;">Hour Meter: ${inspection.hourMeter} hrs</p>
+
+      ${inspection.groundedReason ? `
+        <div style="background:#fde8e8;border:1px solid #f87171;border-radius:8px;padding:12px;margin:16px 0;">
+          <p style="font-size:11px;font-weight:700;color:#EF4444;margin:0 0 4px;">GROUNDED — REASON:</p>
+          <p style="font-size:12px;color:#EF4444;margin:0;">${inspection.groundedReason}</p>
+        </div>
+      ` : ""}
+
+      <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+
+      <h3 style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Signature</h3>
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px;height:100px;">
+        <svg width="100%" height="100">${signatureSvg}</svg>
+      </div>
+
+      <p style="font-size:10px;color:#999;text-align:center;margin-top:24px;">Generated by DiggerSafe Fleet & Safety</p>
+    </body>
+    </html>
+  `;
+}
 
 export default function ReportScreen() {
   const colors = useColors();
@@ -362,9 +453,26 @@ export default function ReportScreen() {
           </View>
         </View>
 
-        {/* Back to Fleet */}
+        {/* Share / Email Report */}
         <TouchableOpacity
-          onPress={() => router.replace("/(tabs)" as any)}
+          onPress={async () => {
+            if (!inspection) return;
+            try {
+              const html = generateReportHTML(inspection);
+              const { uri } = await Print.printToFileAsync({ html, base64: false });
+              if (Platform.OS === "web") {
+                await Print.printAsync({ html });
+              } else {
+                await Sharing.shareAsync(uri, {
+                  mimeType: "application/pdf",
+                  dialogTitle: `DiggerSafe Report - ${inspection.assetId}`,
+                  UTI: "com.adobe.pdf",
+                });
+              }
+            } catch (e: any) {
+              Alert.alert("Error", "Could not generate PDF: " + e.message);
+            }
+          }}
           activeOpacity={0.8}
           style={{
             backgroundColor: colors.primary,
@@ -377,8 +485,29 @@ export default function ReportScreen() {
             marginTop: 20,
           }}
         >
-          <MaterialIcons name="arrow-back" size={20} color="#1A1A1A" />
-          <Text style={{ fontSize: 16, fontWeight: "700", color: "#1A1A1A" }}>Back to Fleet</Text>
+          <MaterialIcons name="share" size={20} color="#1A1A1A" />
+          <Text style={{ fontSize: 16, fontWeight: "700", color: "#1A1A1A" }}>Share / Email Report</Text>
+        </TouchableOpacity>
+
+        {/* Back to Fleet */}
+        <TouchableOpacity
+          onPress={() => router.replace("/(tabs)" as any)}
+          activeOpacity={0.7}
+          style={{
+            backgroundColor: colors.surface,
+            borderRadius: 14,
+            padding: 16,
+            alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 8,
+            marginTop: 10,
+            borderWidth: 1,
+            borderColor: colors.border,
+          }}
+        >
+          <MaterialIcons name="arrow-back" size={20} color={colors.foreground} />
+          <Text style={{ fontSize: 16, fontWeight: "700", color: colors.foreground }}>Back to Fleet</Text>
         </TouchableOpacity>
       </ScrollView>
     </ScreenContainer>

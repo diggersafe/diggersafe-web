@@ -95,6 +95,7 @@ export default function RootLayout() {
             <Stack.Screen name="inspection-complete" />
             <Stack.Screen name="report/[id]" />
             <Stack.Screen name="qr-tag/[id]" />
+            <Stack.Screen name="add-service/[id]" />
             <Stack.Screen name="oauth/callback" />
           </Stack>
           <StatusBar style="auto" />
