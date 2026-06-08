@@ -61,9 +61,15 @@ export default function OnboardingScreen() {
                   </View>
                   <Text style={{ fontSize: 14, color: colors.foreground, marginLeft: 12 }}>GPS & timestamp compliance logging</Text>
                 </View>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
                   <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.warning + "20", alignItems: "center", justifyContent: "center" }}>
-                    <MaterialIcons name="qr-code" size={22} color={colors.warning} />
+                    <MaterialIcons name="build" size={22} color={colors.warning} />
+                  </View>
+                  <Text style={{ fontSize: 14, color: colors.foreground, marginLeft: 12 }}>Service interval reminders & logs</Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.error + "20", alignItems: "center", justifyContent: "center" }}>
+                    <MaterialIcons name="qr-code" size={22} color={colors.error} />
                   </View>
                   <Text style={{ fontSize: 14, color: colors.foreground, marginLeft: 12 }}>QR stickers for quick machine access</Text>
                 </View>
