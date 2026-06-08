@@ -38,7 +38,7 @@ export interface Inspection {
   makeModel: string;
   date: string;
   timestamp: string; // ISO string with exact time
-  inspector: string;
+  operator: string;
   hourMeter: number;
   checks: SafetyCheck[];
   signatureBase64: string;
@@ -48,7 +48,7 @@ export interface Inspection {
 }
 
 export interface AppSettings {
-  inspectorName: string;
+  operatorName: string;
   companyName: string;
 }
 
@@ -91,7 +91,7 @@ const SERVICES_KEY = "diggersafe_services";
 const DEFAULT_MACHINES: Machine[] = [];
 
 const DEFAULT_SETTINGS: AppSettings = {
-  inspectorName: "Darren Gray",
+  operatorName: "Darren Gray",
   companyName: "DiggerSafe Fleet & Safety",
 };
 

@@ -267,7 +267,7 @@ export default function InspectionScreen() {
       makeModel: machine.makeModel,
       date: new Date().toISOString().split("T")[0],
       timestamp: new Date().toISOString(),
-      inspector: settings.inspectorName,
+      operator: settings.operatorName,
       hourMeter: parseInt(hourMeter) || machine.hourMeter,
       checks,
       signatureBase64: "",

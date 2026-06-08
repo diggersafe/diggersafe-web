@@ -62,8 +62,8 @@ function generateReportHTML(inspection: Inspection): string {
       <table style="width:100%;margin-bottom:16px;">
         <tr><td style="font-size:11px;color:#666;text-transform:uppercase;">Asset ID</td><td style="font-size:11px;color:#666;text-transform:uppercase;">Make/Model</td></tr>
         <tr><td style="font-size:15px;font-weight:600;padding-bottom:8px;">${inspection.assetId}</td><td style="font-size:15px;padding-bottom:8px;">${inspection.makeModel}</td></tr>
-        <tr><td style="font-size:11px;color:#666;text-transform:uppercase;">Date</td><td style="font-size:11px;color:#666;text-transform:uppercase;">Inspector</td></tr>
-        <tr><td style="font-size:15px;padding-bottom:8px;">${dateStr}</td><td style="font-size:15px;padding-bottom:8px;">${inspection.inspector}</td></tr>
+        <tr><td style="font-size:11px;color:#666;text-transform:uppercase;">Date</td><td style="font-size:11px;color:#666;text-transform:uppercase;">Operator</td></tr>
+        <tr><td style="font-size:15px;padding-bottom:8px;">${dateStr}</td><td style="font-size:15px;padding-bottom:8px;">${inspection.operator}</td></tr>
         <tr><td style="font-size:11px;color:#666;text-transform:uppercase;">Hour Meter</td><td></td></tr>
         <tr><td style="font-size:18px;font-weight:700;font-family:monospace;">${inspection.hourMeter} hrs</td><td></td></tr>
       </table>
@@ -239,10 +239,10 @@ export default function ReportScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 11, fontWeight: "600", color: colors.muted, textTransform: "uppercase" }}>
-                Inspector
+                Operator
               </Text>
               <Text style={{ fontSize: 15, fontWeight: "500", color: colors.foreground, marginTop: 2 }}>
-                {inspection.inspector}
+                {inspection.operator}
               </Text>
             </View>
           </View>

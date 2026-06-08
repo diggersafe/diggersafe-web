@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Text, View, TextInput, TouchableOpacity, Alert, Platform } from "react-native";
+import { Text, View, TextInput, TouchableOpacity, Platform } from "react-native";
 import { useFocusEffect } from "expo-router";
 
 import { ScreenContainer } from "@/components/screen-container";
@@ -8,7 +8,7 @@ import { getSettings, saveSettings, type AppSettings } from "@/lib/store";
 
 export default function SettingsScreen() {
   const colors = useColors();
-  const [settings, setSettings] = useState<AppSettings>({ inspectorName: "", companyName: "" });
+  const [settings, setSettings] = useState<AppSettings>({ operatorName: "", companyName: "" });
   const [saved, setSaved] = useState(false);
 
   useFocusEffect(
@@ -34,17 +34,17 @@ export default function SettingsScreen() {
     <ScreenContainer className="px-4 pt-2">
       <View style={{ marginBottom: 24 }}>
         <Text style={{ fontSize: 32, fontWeight: "800", color: colors.foreground }}>Settings</Text>
-        <Text style={{ fontSize: 14, color: colors.muted }}>Configure your inspector details</Text>
+        <Text style={{ fontSize: 14, color: colors.muted }}>Configure your operator details</Text>
       </View>
 
       <View style={{ gap: 20 }}>
         <View>
           <Text style={{ fontSize: 13, fontWeight: "600", color: colors.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-            Inspector Name
+            Operator Name
           </Text>
           <TextInput
-            value={settings.inspectorName}
-            onChangeText={(text) => setSettings((s) => ({ ...s, inspectorName: text }))}
+            value={settings.operatorName}
+            onChangeText={(text) => setSettings((s) => ({ ...s, operatorName: text }))}
             placeholder="Enter your name"
             placeholderTextColor={colors.muted + "80"}
             returnKeyType="done"

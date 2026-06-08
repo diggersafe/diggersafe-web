@@ -56,7 +56,7 @@ function InspectionRow({ inspection, onPress }: { inspection: Inspection; onPres
             {inspection.assetId} — {inspection.makeModel}
           </Text>
           <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
-            {dateStr} • {inspection.inspector} • {inspection.hourMeter} hrs
+            {dateStr} • {inspection.operator} • {inspection.hourMeter} hrs
           </Text>
         </View>
         <View style={{ backgroundColor: resultColor + "20", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
@@ -116,7 +116,7 @@ export default function HistoryScreen() {
         (i) =>
           i.assetId.toLowerCase().includes(q) ||
           i.makeModel.toLowerCase().includes(q) ||
-          i.inspector.toLowerCase().includes(q)
+          i.operator.toLowerCase().includes(q)
       );
     }
 
@@ -159,7 +159,7 @@ export default function HistoryScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Search by asset ID, model, or inspector..."
+            placeholder="Search by asset ID, model, or operator..."
             placeholderTextColor={colors.muted + "80"}
             style={{
               flex: 1,

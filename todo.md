@@ -38,3 +38,4 @@
 - [x] Add PDF report generation and Share/Email button on inspection reports
 - [x] Add date filtering to History tab for finding old reports
 - [x] Redesign QR tag screen as branded sticker with "Be WorkSafe" tagline and DiggerSafe colors
+- [x] Change all "Inspector" references to "Operator" throughout the app

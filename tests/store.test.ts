@@ -148,7 +148,7 @@ describe("Store - Inspections", () => {
       makeModel: "CAT 320F Excavator",
       date: "2026-06-08",
       timestamp: "2026-06-08T08:00:00.000Z",
-      inspector: "Darren Gray",
+      operator: "Darren Gray",
       hourMeter: 767,
       checks,
       signatureBase64: "test-signature",
@@ -157,7 +157,7 @@ describe("Store - Inspections", () => {
 
     expect(inspection.id).toBeDefined();
     expect(inspection.cleared).toBe(true);
-    expect(inspection.inspector).toBe("Darren Gray");
+    expect(inspection.operator).toBe("Darren Gray");
     expect(inspection.hourMeter).toBe(767);
   });
 
@@ -184,7 +184,7 @@ describe("Store - Inspections", () => {
       makeModel: "CAT 320F Excavator",
       date: "2026-06-08",
       timestamp: "2026-06-08T08:00:00.000Z",
-      inspector: "Darren Gray",
+      operator: "Darren Gray",
       hourMeter: 767,
       checks,
       signatureBase64: "test-signature",
@@ -218,7 +218,7 @@ describe("Store - Inspections", () => {
       makeModel: "CAT 320F Excavator",
       date: "2026-06-08",
       timestamp: "2026-06-08T09:00:00.000Z",
-      inspector: "Darren Gray",
+      operator: "Darren Gray",
       hourMeter: 410,
       checks,
       signatureBase64: "test-signature",
@@ -239,18 +239,18 @@ describe("Store - Settings", () => {
 
   it("should return default settings", async () => {
     const settings = await getSettings();
-    expect(settings.inspectorName).toBe("Darren Gray");
+    expect(settings.operatorName).toBe("Darren Gray");
     expect(settings.companyName).toBe("DiggerSafe Fleet & Safety");
   });
 
   it("should save and retrieve custom settings", async () => {
     await saveSettings({
-      inspectorName: "John Smith",
+      operatorName: "John Smith",
       companyName: "Smith Excavations",
     });
 
     const settings = await getSettings();
-    expect(settings.inspectorName).toBe("John Smith");
+    expect(settings.operatorName).toBe("John Smith");
     expect(settings.companyName).toBe("Smith Excavations");
   });
 });
