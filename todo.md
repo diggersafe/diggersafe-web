@@ -52,3 +52,4 @@
 - [x] Service interval alerts based on hour meter readings
 - [x] Service interval configuration per machine (via nextServiceHours on service records)
 - [x] Add service interval reminders & logs mention to onboarding front page
+- [ ] Add date confirmation step when starting pre-hire check (after entering hours)
