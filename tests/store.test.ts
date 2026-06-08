@@ -239,8 +239,8 @@ describe("Store - Settings", () => {
 
   it("should return default settings", async () => {
     const settings = await getSettings();
-    expect(settings.operatorName).toBe("Darren Gray");
-    expect(settings.companyName).toBe("DiggerSafe Fleet & Safety");
+    expect(settings.operatorName).toBe("");
+    expect(settings.companyName).toBe("");
   });
 
   it("should save and retrieve custom settings", async () => {

@@ -85,14 +85,15 @@ const MACHINES_KEY = "diggersafe_machines";
 const INSPECTIONS_KEY = "diggersafe_inspections";
 const SETTINGS_KEY = "diggersafe_settings";
 const SERVICES_KEY = "diggersafe_services";
+const ONBOARDING_KEY = "diggersafe_onboarding_complete";
 
 // ---- Default Data ----
 
 const DEFAULT_MACHINES: Machine[] = [];
 
 const DEFAULT_SETTINGS: AppSettings = {
-  operatorName: "Darren Gray",
-  companyName: "DiggerSafe Fleet & Safety",
+  operatorName: "",
+  companyName: "",
 };
 
 // ---- WorkSafe Pre-Hire Check Phases ----
@@ -387,4 +388,27 @@ export function isServiceDue(machine: Machine, serviceRecords: ServiceRecord[]):
     }
   }
   return { due: false };
+}
+
+// ---- Onboarding ----
+
+export async function isOnboardingComplete(): Promise<boolean> {
+  const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+  return value === "true";
+}
+
+export async function completeOnboarding(): Promise<void> {
+  await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+}
+
+// ---- Data Management ----
+
+export async function deleteAllData(): Promise<void> {
+  await AsyncStorage.multiRemove([
+    MACHINES_KEY,
+    INSPECTIONS_KEY,
+    SETTINGS_KEY,
+    SERVICES_KEY,
+    ONBOARDING_KEY,
+  ]);
 }

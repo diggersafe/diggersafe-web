@@ -1,13 +1,69 @@
 import { useCallback, useState } from "react";
-import { Text, View, TextInput, TouchableOpacity, Platform } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { Text, View, TextInput, TouchableOpacity, ScrollView, Alert, Platform, Linking } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { getSettings, saveSettings, type AppSettings } from "@/lib/store";
+import { getSettings, saveSettings, deleteAllData, type AppSettings } from "@/lib/store";
+
+function SettingsRow({
+  icon,
+  label,
+  subtitle,
+  onPress,
+  danger,
+}: {
+  icon: string;
+  label: string;
+  subtitle?: string;
+  onPress: () => void;
+  danger?: boolean;
+}) {
+  const colors = useColors();
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: colors.surface,
+        borderRadius: 12,
+        padding: 14,
+        borderWidth: 1,
+        borderColor: danger ? colors.error + "30" : colors.border,
+      }}
+    >
+      <View
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 8,
+          backgroundColor: danger ? colors.error + "15" : colors.primary + "15",
+          alignItems: "center",
+          justifyContent: "center",
+          marginRight: 12,
+        }}
+      >
+        <MaterialIcons name={icon as any} size={20} color={danger ? colors.error : colors.primary} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 15, fontWeight: "600", color: danger ? colors.error : colors.foreground }}>
+          {label}
+        </Text>
+        {subtitle && (
+          <Text style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>{subtitle}</Text>
+        )}
+      </View>
+      <MaterialIcons name="chevron-right" size={20} color={colors.muted} />
+    </TouchableOpacity>
+  );
+}
 
 export default function SettingsScreen() {
   const colors = useColors();
+  const router = useRouter();
   const [settings, setSettings] = useState<AppSettings>({ operatorName: "", companyName: "" });
   const [saved, setSaved] = useState(false);
 
@@ -30,80 +86,153 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleDeleteData = () => {
+    Alert.alert(
+      "Delete All Data",
+      "This will permanently delete all your machines, inspection records, service records, and settings. This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete Everything",
+          style: "destructive",
+          onPress: async () => {
+            await deleteAllData();
+            if (Platform.OS !== "web") {
+              const Haptics = await import("expo-haptics");
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            }
+            Alert.alert("Data Deleted", "All app data has been removed. The app will now reset.", [
+              { text: "OK", onPress: () => router.replace("/onboarding" as any) },
+            ]);
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScreenContainer className="px-4 pt-2">
-      <View style={{ marginBottom: 24 }}>
-        <Text style={{ fontSize: 32, fontWeight: "800", color: colors.foreground }}>Settings</Text>
-        <Text style={{ fontSize: 14, color: colors.muted }}>Configure your operator details</Text>
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 32, fontWeight: "800", color: colors.foreground }}>Settings</Text>
+          <Text style={{ fontSize: 14, color: colors.muted }}>Configure your operator details</Text>
+        </View>
 
-      <View style={{ gap: 20 }}>
-        <View>
-          <Text style={{ fontSize: 13, fontWeight: "600", color: colors.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-            Operator Name
+        {/* Operator Details */}
+        <View style={{ gap: 16, marginBottom: 32 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: colors.muted, textTransform: "uppercase", letterSpacing: 0.5 }}>
+            Operator Details
           </Text>
-          <TextInput
-            value={settings.operatorName}
-            onChangeText={(text) => setSettings((s) => ({ ...s, operatorName: text }))}
-            placeholder="Enter your name"
-            placeholderTextColor={colors.muted + "80"}
-            returnKeyType="done"
+          <View>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.muted, marginBottom: 6 }}>
+              Operator Name
+            </Text>
+            <TextInput
+              value={settings.operatorName}
+              onChangeText={(text) => setSettings((s) => ({ ...s, operatorName: text }))}
+              placeholder="Enter your name"
+              placeholderTextColor={colors.muted + "80"}
+              returnKeyType="done"
+              style={{
+                backgroundColor: colors.surface,
+                borderRadius: 12,
+                padding: 14,
+                fontSize: 16,
+                color: colors.foreground,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            />
+          </View>
+
+          <View>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: colors.muted, marginBottom: 6 }}>
+              Company Name
+            </Text>
+            <TextInput
+              value={settings.companyName}
+              onChangeText={(text) => setSettings((s) => ({ ...s, companyName: text }))}
+              placeholder="Enter company name"
+              placeholderTextColor={colors.muted + "80"}
+              returnKeyType="done"
+              style={{
+                backgroundColor: colors.surface,
+                borderRadius: 12,
+                padding: 14,
+                fontSize: 16,
+                color: colors.foreground,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSave}
+            activeOpacity={0.8}
             style={{
-              backgroundColor: colors.surface,
+              backgroundColor: colors.primary,
               borderRadius: 12,
-              padding: 14,
-              fontSize: 16,
-              color: colors.foreground,
-              borderWidth: 1,
-              borderColor: colors.border,
+              padding: 16,
+              alignItems: "center",
+              marginTop: 4,
             }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "700", color: "#1A1A1A" }}>
+              {saved ? "Saved \u2713" : "Save Settings"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Legal & Support */}
+        <View style={{ gap: 10, marginBottom: 32 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: colors.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+            Legal & Support
+          </Text>
+          <SettingsRow
+            icon="policy"
+            label="Privacy Policy"
+            subtitle="How we handle your data"
+            onPress={() => router.push("/privacy-policy" as any)}
+          />
+          <SettingsRow
+            icon="description"
+            label="Terms of Service"
+            subtitle="Usage terms and conditions"
+            onPress={() => router.push("/terms-of-service" as any)}
+          />
+          <SettingsRow
+            icon="email"
+            label="Contact Support"
+            subtitle="Get help with DiggerSafe"
+            onPress={() => Linking.openURL("mailto:support@diggersafe.com.au")}
           />
         </View>
 
-        <View>
-          <Text style={{ fontSize: 13, fontWeight: "600", color: colors.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-            Company Name
+        {/* Danger Zone */}
+        <View style={{ gap: 10, marginBottom: 32 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: colors.error, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+            Danger Zone
           </Text>
-          <TextInput
-            value={settings.companyName}
-            onChangeText={(text) => setSettings((s) => ({ ...s, companyName: text }))}
-            placeholder="Enter company name"
-            placeholderTextColor={colors.muted + "80"}
-            returnKeyType="done"
-            style={{
-              backgroundColor: colors.surface,
-              borderRadius: 12,
-              padding: 14,
-              fontSize: 16,
-              color: colors.foreground,
-              borderWidth: 1,
-              borderColor: colors.border,
-            }}
+          <SettingsRow
+            icon="delete-forever"
+            label="Delete All Data"
+            subtitle="Permanently remove all records and reset the app"
+            onPress={handleDeleteData}
+            danger
           />
         </View>
 
-        <TouchableOpacity
-          onPress={handleSave}
-          activeOpacity={0.8}
-          style={{
-            backgroundColor: colors.primary,
-            borderRadius: 12,
-            padding: 16,
-            alignItems: "center",
-            marginTop: 8,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "700", color: "#1A1A1A" }}>
-            {saved ? "Saved ✓" : "Save Settings"}
+        {/* Footer */}
+        <View style={{ paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.border }}>
+          <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>
+            DiggerSafe Fleet & Safety v1.0.0
           </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={{ marginTop: 40, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.border }}>
-        <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>
-          DiggerSafe Fleet & Safety v1.0.0
-        </Text>
-      </View>
+          <Text style={{ fontSize: 11, color: colors.muted + "80", textAlign: "center", marginTop: 4 }}>
+            WorkSafe compliant pre-hire inspections
+          </Text>
+        </View>
+      </ScrollView>
     </ScreenContainer>
   );
 }

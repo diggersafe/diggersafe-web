@@ -14,10 +14,10 @@
 - [x] Settings screen (inspector name, company)
 - [x] Local data persistence with AsyncStorage
 - [x] QR code generation for machine tags
-- [ ] Photo evidence capture during inspections
-- [ ] Share/Email report functionality
+- [x] Photo evidence capture during inspections
+- [x] Share/Email report functionality
 - [x] Generate app logo and branding
-- [ ] Polish UI and haptic feedback
+- [x] Polish UI and haptic feedback
 - [x] Switch to dark theme as default
 - [x] Rebuild inspection with 3-phase structure (Engine OFF, Engine ON, Moving)
 - [x] Add 15 specific WorkSafe check items across 3 phases
@@ -39,3 +39,9 @@
 - [x] Add date filtering to History tab for finding old reports
 - [x] Redesign QR tag screen as branded sticker with "Be WorkSafe" tagline and DiggerSafe colors
 - [x] Change all "Inspector" references to "Operator" throughout the app
+- [x] Onboarding flow (first-launch wizard for operator name and company)
+- [x] Photo evidence capture on critical fail items during inspection
+- [x] Privacy Policy screen (required by App Store and Google Play)
+- [x] Terms of Service screen (required for paid apps)
+- [x] Delete All Data option in Settings (required by Apple)
+- [x] Support/contact info in Settings (required by both stores)

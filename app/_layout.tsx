@@ -18,6 +18,7 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
+import { isOnboardingComplete } from "@/lib/store";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -33,9 +34,20 @@ export default function RootLayout() {
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
 
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
   // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
     initManusRuntime();
+  }, []);
+
+  // Check onboarding status
+  useEffect(() => {
+    isOnboardingComplete().then((complete) => {
+      setNeedsOnboarding(!complete);
+      setOnboardingChecked(true);
+    });
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
@@ -86,7 +98,8 @@ export default function RootLayout() {
           {/* If a screen needs the native header, explicitly enable it and set a human title via Stack.Screen options. */}
           {/* in order for ios apps tab switching to work properly, use presentation: "fullScreenModal" for login page, whenever you decide to use presentation: "modal*/}
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="(tabs)" redirect={needsOnboarding} />
+            <Stack.Screen name="onboarding" />
             <Stack.Screen name="add-machine" />
             <Stack.Screen name="machine/[id]" />
             <Stack.Screen name="edit-machine/[id]" />
@@ -96,6 +109,8 @@ export default function RootLayout() {
             <Stack.Screen name="report/[id]" />
             <Stack.Screen name="qr-tag/[id]" />
             <Stack.Screen name="add-service/[id]" />
+            <Stack.Screen name="privacy-policy" />
+            <Stack.Screen name="terms-of-service" />
             <Stack.Screen name="oauth/callback" />
           </Stack>
           <StatusBar style="auto" />

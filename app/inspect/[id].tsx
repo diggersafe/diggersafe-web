@@ -7,7 +7,9 @@ import {
   ScrollView,
   Alert,
   Platform,
+  Image,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -29,16 +31,20 @@ function PhaseCheckItem({
   result,
   isCritical,
   notes,
+  photoUri,
   onToggle,
   onNotesChange,
+  onPhotoCapture,
 }: {
   label: string;
   description: string;
   result: CheckResult;
   isCritical: boolean;
   notes: string;
+  photoUri?: string;
   onToggle: (result: CheckResult) => void;
   onNotesChange: (notes: string) => void;
+  onPhotoCapture: () => void;
 }) {
   const colors = useColors();
   const showNotesField = result === "fail";
@@ -136,7 +142,7 @@ function PhaseCheckItem({
       {showNotesField && (
         <View style={{ marginTop: 10 }}>
           <Text style={{ fontSize: 11, fontWeight: "600", color: colors.error, marginBottom: 4 }}>
-            {isCritical ? "⚠️ CRITICAL FAIL — Comment required (machine will be grounded)" : "Comment required for failed item"}
+            {isCritical ? "⚠️ CRITICAL FAIL — Comment & photo required (machine will be grounded)" : "Comment required for failed item"}
           </Text>
           <TextInput
             value={notes}
@@ -157,6 +163,34 @@ function PhaseCheckItem({
               textAlignVertical: "top",
             }}
           />
+          {/* Photo evidence */}
+          <TouchableOpacity
+            onPress={onPhotoCapture}
+            activeOpacity={0.7}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginTop: 8,
+              backgroundColor: photoUri ? colors.success + "15" : colors.error + "10",
+              borderRadius: 8,
+              padding: 10,
+              borderWidth: 1,
+              borderColor: photoUri ? colors.success + "40" : colors.error + "30",
+              borderStyle: "dashed",
+            }}
+          >
+            <MaterialIcons
+              name={photoUri ? "check-circle" : "camera-alt"}
+              size={20}
+              color={photoUri ? colors.success : colors.error}
+            />
+            <Text style={{ fontSize: 13, color: photoUri ? colors.success : colors.error, marginLeft: 8, fontWeight: "500" }}>
+              {photoUri ? "Photo attached" : (isCritical ? "Take photo (required)" : "Take photo (optional)")}
+            </Text>
+          </TouchableOpacity>
+          {photoUri && (
+            <Image source={{ uri: photoUri }} style={{ width: "100%", height: 120, borderRadius: 8, marginTop: 8 }} resizeMode="cover" />
+          )}
         </View>
       )}
     </View>
@@ -209,6 +243,40 @@ export default function InspectionScreen() {
     });
   };
 
+  const handlePhotoCapture = async (checkIndex: number) => {
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Camera Permission", "Camera access is needed to take evidence photos.");
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        quality: 0.7,
+        allowsEditing: false,
+      });
+      if (!result.canceled && result.assets[0]) {
+        setChecks((prev) => {
+          const updated = [...prev];
+          updated[checkIndex] = { ...updated[checkIndex], photoUri: result.assets[0].uri };
+          return updated;
+        });
+      }
+    } else {
+      // On web, use image library picker instead of camera
+      const result = await ImagePicker.launchImageLibraryAsync({
+        quality: 0.7,
+        allowsEditing: false,
+      });
+      if (!result.canceled && result.assets[0]) {
+        setChecks((prev) => {
+          const updated = [...prev];
+          updated[checkIndex] = { ...updated[checkIndex], photoUri: result.assets[0].uri };
+          return updated;
+        });
+      }
+    }
+  };
+
   // Get checks for current phase
   const currentPhaseData = INSPECTION_PHASES[currentPhase - 1];
   const currentPhaseChecks = currentPhase > 0
@@ -218,7 +286,8 @@ export default function InspectionScreen() {
   const phaseAllChecked = currentPhaseChecks.every((c) => c.result !== "pending");
   const phaseFailedItems = currentPhaseChecks.filter((c) => c.result === "fail");
   const phaseFailsNeedNotes = phaseFailedItems.every((c) => c.notes.trim().length > 0);
-  const canAdvancePhase = phaseAllChecked && (phaseFailedItems.length === 0 || phaseFailsNeedNotes);
+  const phaseCriticalFailsHavePhotos = phaseFailedItems.filter((c) => c.isCritical).every((c) => c.photoUri);
+  const canAdvancePhase = phaseAllChecked && (phaseFailedItems.length === 0 || (phaseFailsNeedNotes && phaseCriticalFailsHavePhotos));
 
   const allChecked = checks.every((c) => c.result !== "pending");
   const hasCriticalFails = checks.some((c) => c.result === "fail" && c.isCritical);
@@ -235,14 +304,14 @@ export default function InspectionScreen() {
       setCurrentPhase(1);
     } else if (currentPhase < 3) {
       if (!canAdvancePhase) {
-        Alert.alert("Incomplete", "All items must be checked. Failed items require a comment.");
+        Alert.alert("Incomplete", "All items must be checked. Failed items require a comment. Critical fails also require a photo.");
         return;
       }
       setCurrentPhase(currentPhase + 1);
     } else {
       // Final phase complete — go to signature
       if (!canAdvancePhase) {
-        Alert.alert("Incomplete", "All items must be checked. Failed items require a comment.");
+        Alert.alert("Incomplete", "All items must be checked. Failed items require a comment. Critical fails also require a photo.");
         return;
       }
       handleSubmit();
@@ -451,8 +520,10 @@ export default function InspectionScreen() {
                   result={check.result}
                   isCritical={item.isCritical}
                   notes={check.notes}
+                  photoUri={check.photoUri}
                   onToggle={(result) => handleToggle(checkIndex, result)}
                   onNotesChange={(notes) => handleNotesChange(checkIndex, notes)}
+                  onPhotoCapture={() => handlePhotoCapture(checkIndex)}
                 />
               );
             })}
