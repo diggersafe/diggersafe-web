@@ -5,7 +5,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
-import { getMachines, deleteMachine, getInspections, getServiceRecordsForMachine, type Machine, type Inspection, type ServiceRecord, SERVICE_TYPE_LABELS } from "@/lib/store";
+import { getMachines, deleteMachine, getInspections, getServiceRecordsForMachine, isServiceDue, type Machine, type Inspection, type ServiceRecord, SERVICE_TYPE_LABELS } from "@/lib/store";
+import { SubscriptionExpiredBanner, useWriteAccess } from "@/components/subscription-gate";
 
 export default function MachineDetailScreen() {
   const colors = useColors();
@@ -14,6 +15,7 @@ export default function MachineDetailScreen() {
   const [machine, setMachine] = useState<Machine | null>(null);
   const [lastInspection, setLastInspection] = useState<Inspection | null>(null);
   const [serviceRecords, setServiceRecords] = useState<ServiceRecord[]>([]);
+  const { isAllowed: canWrite, guardAction } = useWriteAccess();
 
   useFocusEffect(
     useCallback(() => {
@@ -175,12 +177,44 @@ export default function MachineDetailScreen() {
           </View>
         )}
 
+        <SubscriptionExpiredBanner />
+
+        {/* Service Interval Alert */}
+        {machine && serviceRecords.length > 0 && (() => {
+          const serviceAlert = isServiceDue(machine, serviceRecords);
+          if (!serviceAlert.due) return null;
+          return (
+            <View
+              style={{
+                backgroundColor: colors.error + "10",
+                borderRadius: 12,
+                padding: 14,
+                borderWidth: 1,
+                borderColor: colors.error + "25",
+                marginBottom: 16,
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <MaterialIcons name="build" size={20} color={colors.error} style={{ marginRight: 10 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: colors.error }}>
+                  Service Overdue
+                </Text>
+                <Text style={{ fontSize: 12, color: colors.error + "CC", marginTop: 2 }}>
+                  {serviceAlert.serviceType} — {serviceAlert.hoursOverdue} hrs past due
+                </Text>
+              </View>
+            </View>
+          );
+        })()}
+
         {/* Start Pre-Hire Check Button */}
         <TouchableOpacity
-          onPress={() => router.push(`/inspect/${machine.id}` as any)}
+          onPress={() => guardAction(() => router.push(`/inspect/${machine.id}` as any))}
           activeOpacity={0.8}
           style={{
-            backgroundColor: colors.primary,
+            backgroundColor: canWrite ? colors.primary : colors.muted + "40",
             borderRadius: 14,
             padding: 18,
             alignItems: "center",
@@ -190,7 +224,7 @@ export default function MachineDetailScreen() {
             marginBottom: 16,
           }}
         >
-          <MaterialIcons name="assignment" size={22} color="#1A1A1A" />
+          <MaterialIcons name={canWrite ? "assignment" : "lock"} size={22} color="#1A1A1A" />
           <Text style={{ fontSize: 17, fontWeight: "700", color: "#1A1A1A" }}>
             Start Pre-Hire Check
           </Text>
@@ -198,7 +232,7 @@ export default function MachineDetailScreen() {
 
         {/* Log Service Button */}
         <TouchableOpacity
-          onPress={() => router.push(`/add-service/${machine.id}` as any)}
+          onPress={() => guardAction(() => router.push(`/add-service/${machine.id}` as any))}
           activeOpacity={0.8}
           style={{
             backgroundColor: colors.surface,
@@ -279,7 +313,7 @@ export default function MachineDetailScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => router.push(`/edit-machine/${machine.id}` as any)}
+            onPress={() => guardAction(() => router.push(`/edit-machine/${machine.id}` as any))}
             activeOpacity={0.7}
             style={{
               flex: 1,
@@ -299,7 +333,7 @@ export default function MachineDetailScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={handleDelete}
+            onPress={() => guardAction(handleDelete)}
             activeOpacity={0.7}
             style={{
               flex: 1,

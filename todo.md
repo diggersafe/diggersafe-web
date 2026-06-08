@@ -34,7 +34,7 @@
 - [x] Polish overall UI to match base44 version quality
 - [x] Fix header logo to use actual app icon image instead of MaterialIcons placeholder
 - [x] Add Service Records feature (maintenance tracking per machine)
-- [ ] Add service interval alerts based on hour meter readings
+- [x] Add service interval alerts based on hour meter readings
 - [x] Add PDF report generation and Share/Email button on inspection reports
 - [x] Add date filtering to History tab for finding old reports
 - [x] Redesign QR tag screen as branded sticker with "Be WorkSafe" tagline and DiggerSafe colors
@@ -45,3 +45,9 @@
 - [x] Terms of Service screen (required for paid apps)
 - [x] Delete All Data option in Settings (required by Apple)
 - [x] Support/contact info in Settings (required by both stores)
+- [x] Subscription state management (active/expired/trial)
+- [x] Read-only mode gating for lapsed subscribers
+- [x] Paywall/subscribe screen with pricing
+- [x] Cloud backup for inspection records and fleet data
+- [x] Service interval alerts based on hour meter readings
+- [x] Service interval configuration per machine (via nextServiceHours on service records)

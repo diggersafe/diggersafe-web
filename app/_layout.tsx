@@ -109,6 +109,7 @@ export default function RootLayout() {
             <Stack.Screen name="report/[id]" />
             <Stack.Screen name="qr-tag/[id]" />
             <Stack.Screen name="add-service/[id]" />
+            <Stack.Screen name="subscribe" />
             <Stack.Screen name="privacy-policy" />
             <Stack.Screen name="terms-of-service" />
             <Stack.Screen name="oauth/callback" />

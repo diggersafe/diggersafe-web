@@ -7,6 +7,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { AppHeader } from "@/components/app-header";
 import { useColors } from "@/hooks/use-colors";
 import { getMachines, getInspections, type Machine, type Inspection } from "@/lib/store";
+import { SubscriptionExpiredBanner, useWriteAccess } from "@/components/subscription-gate";
 
 export default function InspectScreen() {
   const colors = useColors();
@@ -14,6 +15,7 @@ export default function InspectScreen() {
   const [machines, setMachines] = useState<Machine[]>([]);
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { isAllowed: canWrite, guardAction } = useWriteAccess();
 
   const loadData = useCallback(async () => {
     const [machineData, inspectionData] = await Promise.all([
@@ -63,6 +65,9 @@ export default function InspectScreen() {
         <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
           Select a machine to start a pre-hire check
         </Text>
+        <View style={{ marginTop: 10 }}>
+          <SubscriptionExpiredBanner />
+        </View>
       </View>
 
       {/* Machine List */}
@@ -84,7 +89,7 @@ export default function InspectScreen() {
 
             return (
               <TouchableOpacity
-                onPress={() => router.push(`/inspect/${item.id}` as any)}
+                onPress={() => guardAction(() => router.push(`/inspect/${item.id}` as any))}
                 activeOpacity={0.7}
                 style={{
                   backgroundColor: colors.surface,

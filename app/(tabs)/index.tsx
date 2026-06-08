@@ -6,7 +6,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ScreenContainer } from "@/components/screen-container";
 import { AppHeader } from "@/components/app-header";
 import { useColors } from "@/hooks/use-colors";
-import { getMachines, getInspections, type Machine, type Inspection } from "@/lib/store";
+import { getMachines, getInspections, getServiceRecords, isServiceDue, type Machine, type Inspection, type ServiceRecord } from "@/lib/store";
+import { SubscriptionExpiredBanner, useWriteAccess } from "@/components/subscription-gate";
 
 // Check if a machine is due for inspection (7 days since last inspection)
 function isDueSoon(machineId: string, inspections: Inspection[]): boolean {
@@ -50,9 +51,25 @@ function DueSoonBadge() {
   );
 }
 
-function MachineCard({ machine, dueSoon, onPress }: { machine: Machine; dueSoon: boolean; onPress: () => void }) {
+function ServiceDueBadge({ serviceType }: { serviceType: string }) {
+  return (
+    <View style={{ backgroundColor: "#EF444420", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, flexDirection: "row", alignItems: "center", gap: 3 }}>
+      <MaterialIcons name="build" size={10} color="#EF4444" />
+      <Text style={{ color: "#EF4444", fontSize: 11, fontWeight: "600" }}>Service Due</Text>
+    </View>
+  );
+}
+
+interface MachineCardProps {
+  machine: Machine;
+  dueSoon: boolean;
+  serviceDueInfo: { due: boolean; serviceType?: string; hoursOverdue?: number };
+  onPress: () => void;
+}
+
+function MachineCard({ machine, dueSoon, serviceDueInfo, onPress }: MachineCardProps) {
   const colors = useColors();
-  const needsAttention = dueSoon || machine.status === "grounded";
+  const needsAttention = dueSoon || machine.status === "grounded" || serviceDueInfo.due;
 
   return (
     <TouchableOpacity
@@ -88,6 +105,7 @@ function MachineCard({ machine, dueSoon, onPress }: { machine: Machine; dueSoon:
             </Text>
             <StatusBadge status={machine.status} />
             {dueSoon && machine.status === "active" && <DueSoonBadge />}
+            {serviceDueInfo.due && <ServiceDueBadge serviceType={serviceDueInfo.serviceType || ""} />}
           </View>
           <Text style={{ fontSize: 14, color: colors.muted, marginTop: 3 }}>
             {machine.makeModel}
@@ -95,6 +113,11 @@ function MachineCard({ machine, dueSoon, onPress }: { machine: Machine; dueSoon:
           <Text style={{ fontSize: 12, color: colors.muted + "90", marginTop: 2, fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace" }}>
             S/N:  {machine.serialNumber}
           </Text>
+          {serviceDueInfo.due && serviceDueInfo.hoursOverdue !== undefined && (
+            <Text style={{ fontSize: 11, color: colors.error, marginTop: 3, fontWeight: "600" }}>
+              {serviceDueInfo.serviceType} — {serviceDueInfo.hoursOverdue} hrs overdue
+            </Text>
+          )}
         </View>
         <MaterialIcons name="chevron-right" size={24} color={colors.muted} />
       </View>
@@ -107,16 +130,20 @@ export default function FleetScreen() {
   const router = useRouter();
   const [machines, setMachines] = useState<Machine[]>([]);
   const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [serviceRecords, setServiceRecords] = useState<ServiceRecord[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const { isAllowed: canWrite, guardAction } = useWriteAccess();
 
   const loadData = useCallback(async () => {
-    const [machineData, inspectionData] = await Promise.all([
+    const [machineData, inspectionData, serviceData] = await Promise.all([
       getMachines(),
       getInspections(),
+      getServiceRecords(),
     ]);
     setMachines(machineData);
     setInspections(inspectionData);
+    setServiceRecords(serviceData);
   }, []);
 
   useFocusEffect(
@@ -141,6 +168,9 @@ export default function FleetScreen() {
     );
   });
 
+  // Count machines with service alerts
+  const machinesWithServiceDue = machines.filter((m) => isServiceDue(m, serviceRecords).due).length;
+
   return (
     <ScreenContainer edges={["left", "right"]}>
       <AppHeader showSettings />
@@ -155,22 +185,50 @@ export default function FleetScreen() {
             </Text>
           </View>
           <TouchableOpacity
-            onPress={() => router.push("/add-machine" as any)}
+            onPress={() => guardAction(() => router.push("/add-machine" as any))}
             activeOpacity={0.7}
             style={{
               flexDirection: "row",
               alignItems: "center",
-              backgroundColor: colors.primary,
+              backgroundColor: canWrite ? colors.primary : colors.muted + "40",
               paddingHorizontal: 14,
               paddingVertical: 10,
               borderRadius: 12,
               gap: 4,
             }}
           >
-            <MaterialIcons name="add" size={18} color="#1A1A1A" />
+            <MaterialIcons name={canWrite ? "add" : "lock"} size={18} color="#1A1A1A" />
             <Text style={{ fontSize: 14, fontWeight: "700", color: "#1A1A1A" }}>Add Machine</Text>
           </TouchableOpacity>
         </View>
+
+        <SubscriptionExpiredBanner />
+
+        {/* Service Alert Banner */}
+        {machinesWithServiceDue > 0 && (
+          <View
+            style={{
+              backgroundColor: colors.error + "10",
+              borderRadius: 12,
+              padding: 12,
+              borderWidth: 1,
+              borderColor: colors.error + "25",
+              marginBottom: 12,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <MaterialIcons name="build" size={18} color={colors.error} style={{ marginRight: 10 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 13, fontWeight: "700", color: colors.error }}>
+                Service Alert
+              </Text>
+              <Text style={{ fontSize: 12, color: colors.error + "CC", marginTop: 1 }}>
+                {machinesWithServiceDue} {machinesWithServiceDue === 1 ? "machine" : "machines"} overdue for maintenance
+              </Text>
+            </View>
+          </View>
+        )}
 
         {/* Search Bar */}
         <View
@@ -231,6 +289,7 @@ export default function FleetScreen() {
             <MachineCard
               machine={item}
               dueSoon={isDueSoon(item.id, inspections)}
+              serviceDueInfo={isServiceDue(item, serviceRecords)}
               onPress={() => router.push(`/machine/${item.id}` as any)}
             />
           )}

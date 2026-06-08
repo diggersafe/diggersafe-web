@@ -6,6 +6,9 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { getSettings, saveSettings, deleteAllData, type AppSettings } from "@/lib/store";
+import { useSubscription } from "@/hooks/use-subscription";
+import { useAuth } from "@/hooks/use-auth";
+import { useCloudSync } from "@/hooks/use-cloud-sync";
 
 function SettingsRow({
   icon,
@@ -66,6 +69,9 @@ export default function SettingsScreen() {
   const router = useRouter();
   const [settings, setSettings] = useState<AppSettings>({ operatorName: "", companyName: "" });
   const [saved, setSaved] = useState(false);
+  const { status, daysRemaining, isActive } = useSubscription();
+  const { isAuthenticated } = useAuth();
+  const { syncing, lastSyncAt, error: syncError, pushToCloud, pullFromCloud } = useCloudSync();
 
   useFocusEffect(
     useCallback(() => {
@@ -182,6 +188,60 @@ export default function SettingsScreen() {
               {saved ? "Saved \u2713" : "Save Settings"}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Subscription & Account */}
+        <View style={{ gap: 10, marginBottom: 32 }}>
+          <Text style={{ fontSize: 13, fontWeight: "700", color: colors.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+            Subscription & Account
+          </Text>
+          <SettingsRow
+            icon="verified"
+            label="DiggerSafe Pro"
+            subtitle={
+              status === "active"
+                ? "Active subscription"
+                : status === "trial"
+                ? `Trial: ${daysRemaining ?? 0} days remaining`
+                : status === "expired"
+                ? "Expired — read-only mode"
+                : isAuthenticated
+                ? "Manage your subscription"
+                : "Sign in to manage subscription"
+            }
+            onPress={() => router.push("/subscribe" as any)}
+          />
+          {isAuthenticated && (
+            <SettingsRow
+              icon="cloud-upload"
+              label={syncing ? "Syncing..." : "Sync Now"}
+              subtitle={
+                syncError
+                  ? `Error: ${syncError}`
+                  : lastSyncAt
+                  ? `Last synced: ${new Date(lastSyncAt).toLocaleString("en-AU", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}`
+                  : "Tap to backup your data to the cloud"
+              }
+              onPress={() => pushToCloud()}
+            />
+          )}
+          {isAuthenticated && (
+            <SettingsRow
+              icon="cloud-download"
+              label="Restore from Cloud"
+              subtitle="Download your data from a previous backup"
+              onPress={() => {
+                Alert.alert(
+                  "Restore from Cloud",
+                  "This will download any records from your cloud backup that are not on this device. Your existing local data will not be overwritten.",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Restore", onPress: () => pullFromCloud() },
+                  ]
+                );
+              }}
+            />
+          )}
         </View>
 
         {/* Legal & Support */}
