@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Text, View, TouchableOpacity, ScrollView, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -5,15 +6,44 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useSubscription } from "@/hooks/use-subscription";
-import { useAuth } from "@/hooks/use-auth";
+
+const PLANS = [
+  {
+    id: "starter",
+    name: "Starter",
+    machines: "Up to 2 machines",
+    monthlyPrice: "$4.99",
+    yearlyPrice: "$49",
+    yearlySaving: "Save 18%",
+    limit: 2,
+  },
+  {
+    id: "basic",
+    name: "Basic",
+    machines: "Up to 10 machines",
+    monthlyPrice: "$9.99",
+    yearlyPrice: "$89",
+    yearlySaving: "Save 26%",
+    limit: 10,
+    popular: true,
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    machines: "Unlimited machines",
+    monthlyPrice: "$24.99",
+    yearlyPrice: "$199",
+    yearlySaving: "Save 33%",
+    limit: Infinity,
+  },
+];
 
 const FEATURES = [
-  { icon: "add-circle", text: "Add unlimited machines to your fleet" },
-  { icon: "assignment", text: "Run WorkSafe pre-hire inspections" },
-  { icon: "build", text: "Log service records and maintenance" },
+  { icon: "assignment", text: "WorkSafe pre-hire inspections" },
+  { icon: "build", text: "Service records & maintenance logs" },
   { icon: "cloud-upload", text: "Cloud backup — never lose records" },
-  { icon: "picture-as-pdf", text: "Generate and share PDF reports" },
-  { icon: "qr-code", text: "QR sticker generation for machines" },
+  { icon: "picture-as-pdf", text: "Generate & share PDF reports" },
+  { icon: "qr-code", text: "QR sticker generation" },
   { icon: "gps-fixed", text: "GPS & timestamp compliance logging" },
 ];
 
@@ -21,9 +51,14 @@ export default function SubscribeScreen() {
   const colors = useColors();
   const router = useRouter();
   const { status, daysRemaining, refresh } = useSubscription();
-  const { isAuthenticated } = useAuth();
+  const [selectedPlan, setSelectedPlan] = useState("basic");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
 
   const handleSubscribe = async () => {
+    const plan = PLANS.find((p) => p.id === selectedPlan);
+    const price = billingCycle === "monthly" ? plan?.monthlyPrice : plan?.yearlyPrice;
+    const period = billingCycle === "monthly" ? "month" : "year";
+
     if (Platform.OS === "web") {
       Alert.alert(
         "Subscribe via App",
@@ -33,17 +68,14 @@ export default function SubscribeScreen() {
       return;
     }
 
-    // In production, this would trigger Apple StoreKit or Google Play Billing
-    // For now, show a placeholder that explains the IAP flow
     Alert.alert(
-      "Subscribe to DiggerSafe Pro",
-      "In the released version, this will open the native payment sheet via Apple StoreKit (iOS) or Google Play Billing (Android).\n\nSubscription: $9.99/month or $89.99/year",
+      `Subscribe to ${plan?.name}`,
+      `In the released version, this will open the native payment sheet via Apple StoreKit (iOS) or Google Play Billing (Android).\n\n${plan?.name}: ${price}/${period} — ${plan?.machines}`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Simulate Purchase",
           onPress: async () => {
-            // Simulate a successful purchase for development/testing
             try {
               if (Platform.OS !== "web") {
                 const Haptics = await import("expo-haptics");
@@ -51,7 +83,7 @@ export default function SubscribeScreen() {
               }
               Alert.alert(
                 "Subscription Activated",
-                "Your DiggerSafe Pro subscription is now active. Thank you for subscribing!",
+                `Your DiggerSafe ${plan?.name} subscription is now active. Thank you!`,
                 [{ text: "Continue", onPress: () => router.back() }]
               );
               await refresh();
@@ -75,8 +107,8 @@ export default function SubscribeScreen() {
   return (
     <ScreenContainer edges={["top", "left", "right", "bottom"]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* Header */}
         <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
+          {/* Back Button */}
           <TouchableOpacity
             onPress={() => router.back()}
             activeOpacity={0.7}
@@ -137,66 +169,187 @@ export default function SubscribeScreen() {
           )}
 
           {/* Hero */}
-          <View style={{ alignItems: "center", marginBottom: 28 }}>
+          <View style={{ alignItems: "center", marginBottom: 24 }}>
             <View
               style={{
-                width: 72,
-                height: 72,
-                borderRadius: 18,
+                width: 64,
+                height: 64,
+                borderRadius: 16,
                 backgroundColor: colors.primary + "20",
                 alignItems: "center",
                 justifyContent: "center",
-                marginBottom: 16,
+                marginBottom: 14,
               }}
             >
-              <MaterialIcons name="verified" size={40} color={colors.primary} />
+              <MaterialIcons name="verified" size={36} color={colors.primary} />
             </View>
-            <Text style={{ fontSize: 28, fontWeight: "800", color: colors.foreground, textAlign: "center" }}>
-              DiggerSafe Pro
+            <Text style={{ fontSize: 26, fontWeight: "800", color: colors.foreground, textAlign: "center" }}>
+              Choose Your Plan
             </Text>
-            <Text style={{ fontSize: 15, color: colors.muted, textAlign: "center", marginTop: 6, lineHeight: 22 }}>
-              Full access to WorkSafe-compliant fleet inspections, cloud backup, and unlimited machines.
+            <Text style={{ fontSize: 14, color: colors.muted, textAlign: "center", marginTop: 6, lineHeight: 20 }}>
+              All plans include a 14-day free trial.{"\n"}Cancel anytime.
             </Text>
           </View>
 
-          {/* Pricing */}
+          {/* Billing Toggle */}
           <View
             style={{
+              flexDirection: "row",
               backgroundColor: colors.surface,
-              borderRadius: 16,
-              padding: 20,
-              borderWidth: 2,
-              borderColor: colors.primary,
-              marginBottom: 24,
+              borderRadius: 12,
+              padding: 4,
+              marginBottom: 20,
+              borderWidth: 1,
+              borderColor: colors.border,
             }}
           >
-            <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "center", marginBottom: 4 }}>
-              <Text style={{ fontSize: 36, fontWeight: "800", color: colors.foreground }}>$9.99</Text>
-              <Text style={{ fontSize: 15, color: colors.muted, marginLeft: 4 }}>/month</Text>
-            </View>
-            <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>
-              or $89.99/year (save 25%)
-            </Text>
-            <View
+            <TouchableOpacity
+              onPress={() => setBillingCycle("monthly")}
+              activeOpacity={0.7}
               style={{
-                marginTop: 12,
-                backgroundColor: colors.primary + "15",
-                borderRadius: 8,
-                paddingVertical: 6,
-                paddingHorizontal: 12,
-                alignSelf: "center",
+                flex: 1,
+                paddingVertical: 10,
+                borderRadius: 10,
+                alignItems: "center",
+                backgroundColor: billingCycle === "monthly" ? colors.primary : "transparent",
               }}
             >
-              <Text style={{ fontSize: 12, fontWeight: "700", color: colors.primary }}>
-                14-DAY FREE TRIAL
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "700",
+                  color: billingCycle === "monthly" ? "#1A1A1A" : colors.muted,
+                }}
+              >
+                Monthly
               </Text>
-            </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setBillingCycle("yearly")}
+              activeOpacity={0.7}
+              style={{
+                flex: 1,
+                paddingVertical: 10,
+                borderRadius: 10,
+                alignItems: "center",
+                backgroundColor: billingCycle === "yearly" ? colors.primary : "transparent",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "700",
+                  color: billingCycle === "yearly" ? "#1A1A1A" : colors.muted,
+                }}
+              >
+                Yearly
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Plan Cards */}
+          {PLANS.map((plan) => {
+            const isSelected = selectedPlan === plan.id;
+            return (
+              <TouchableOpacity
+                key={plan.id}
+                onPress={() => setSelectedPlan(plan.id)}
+                activeOpacity={0.7}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: 16,
+                  padding: 18,
+                  marginBottom: 12,
+                  borderWidth: isSelected ? 2.5 : 1,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                  position: "relative",
+                }}
+              >
+                {plan.popular && (
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: -10,
+                      right: 16,
+                      backgroundColor: colors.primary,
+                      paddingHorizontal: 10,
+                      paddingVertical: 3,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Text style={{ fontSize: 10, fontWeight: "800", color: "#1A1A1A" }}>
+                      MOST POPULAR
+                    </Text>
+                  </View>
+                )}
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: "800", color: colors.foreground }}>
+                      {plan.name}
+                    </Text>
+                    <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
+                      {plan.machines}
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: "flex-end" }}>
+                    <Text style={{ fontSize: 24, fontWeight: "800", color: colors.foreground }}>
+                      {billingCycle === "monthly" ? plan.monthlyPrice : plan.yearlyPrice}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: colors.muted }}>
+                      /{billingCycle === "monthly" ? "month" : "year"}
+                    </Text>
+                    {billingCycle === "yearly" && (
+                      <Text style={{ fontSize: 11, fontWeight: "600", color: colors.success, marginTop: 2 }}>
+                        {plan.yearlySaving}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+                {/* Selection indicator */}
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 18,
+                    left: 18,
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    borderWidth: 2,
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    backgroundColor: isSelected ? colors.primary : "transparent",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {isSelected && (
+                    <MaterialIcons name="check" size={14} color="#1A1A1A" />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+
+          {/* Trial badge */}
+          <View
+            style={{
+              backgroundColor: colors.primary + "15",
+              borderRadius: 10,
+              paddingVertical: 8,
+              paddingHorizontal: 14,
+              alignSelf: "center",
+              marginTop: 4,
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ fontSize: 12, fontWeight: "700", color: colors.primary }}>
+              14-DAY FREE TRIAL ON ALL PLANS
+            </Text>
           </View>
 
           {/* Features List */}
-          <View style={{ marginBottom: 28 }}>
+          <View style={{ marginBottom: 24 }}>
             <Text style={{ fontSize: 13, fontWeight: "700", color: colors.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>
-              What's Included
+              All Plans Include
             </Text>
             {FEATURES.map((feature, idx) => (
               <View
@@ -204,13 +357,13 @@ export default function SubscribeScreen() {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  paddingVertical: 10,
+                  paddingVertical: 9,
                   borderBottomWidth: idx < FEATURES.length - 1 ? 1 : 0,
                   borderBottomColor: colors.border + "40",
                 }}
               >
-                <MaterialIcons name={feature.icon as any} size={22} color={colors.success} style={{ marginRight: 12 }} />
-                <Text style={{ fontSize: 15, color: colors.foreground, flex: 1 }}>{feature.text}</Text>
+                <MaterialIcons name={feature.icon as any} size={20} color={colors.success} style={{ marginRight: 12 }} />
+                <Text style={{ fontSize: 14, color: colors.foreground, flex: 1 }}>{feature.text}</Text>
               </View>
             ))}
           </View>
@@ -231,7 +384,7 @@ export default function SubscribeScreen() {
               Start Free Trial
             </Text>
             <Text style={{ fontSize: 12, color: "#1A1A1A" + "AA", marginTop: 2 }}>
-              No charge for 14 days
+              No charge for 14 days • Cancel anytime
             </Text>
           </TouchableOpacity>
 
@@ -268,7 +421,7 @@ export default function SubscribeScreen() {
               What happens if I don't subscribe?
             </Text>
             <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 20 }}>
-              Your existing records remain accessible in read-only mode. You can view past inspections, reports, and machine details. You just won't be able to create new inspections or add machines until you subscribe.
+              Your existing records remain accessible in read-only mode. You can view past inspections and machine details but won't be able to create new inspections or add machines.
             </Text>
           </View>
 

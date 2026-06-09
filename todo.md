@@ -61,3 +61,5 @@
 - [x] Made header logo and title bigger, added more spacing
 - [x] Landing page created and deployed at diggersafe-5f9fm8gn.manus.space
 - [x] Apple Developer account enrolled and App ID registered
+- [x] Updated subscription to 3-tier pricing (Starter $4.99, Basic $9.99, Pro $24.99)
+- [x] Changed tagline to "Fleet Safety & Service"

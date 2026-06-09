@@ -39,7 +39,7 @@ export function AppHeader({ showSettings = false }: AppHeaderProps) {
             <Text style={{ color: colors.success }}>Digger</Text>Safe
           </Text>
           <Text style={{ fontSize: 11, color: colors.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>
-            Fleet & Safety
+            Fleet Safety & Service
           </Text>
         </View>
         {showSettings && (
