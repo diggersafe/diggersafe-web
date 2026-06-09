@@ -14,10 +14,12 @@ function TabIcon({ name, label, focused }: { name: any; label: string; focused: 
         styles.tabButton,
         {
           backgroundColor: focused ? colors.primary : colors.primary + "20",
+          borderWidth: focused ? 0 : 1.5,
+          borderColor: focused ? "transparent" : colors.primary + "50",
         },
       ]}
     >
-      <IconSymbol size={22} name={name} color={focused ? "#1A1A1A" : colors.primary} />
+      <IconSymbol size={18} name={name} color={focused ? "#1A1A1A" : colors.primary} />
       <Text
         style={[
           styles.tabLabel,
@@ -34,7 +36,7 @@ export default function TabLayout() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const bottomPadding = Platform.OS === "web" ? 14 : Math.max(insets.bottom, 10);
-  const tabBarHeight = 76 + bottomPadding;
+  const tabBarHeight = 72 + bottomPadding;
 
   return (
     <Tabs
@@ -44,10 +46,15 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarShowLabel: false,
+        tabBarItemStyle: {
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        },
         tabBarStyle: {
-          paddingTop: 12,
+          paddingTop: 10,
           paddingBottom: bottomPadding,
-          paddingHorizontal: 12,
+          paddingHorizontal: 16,
           height: tabBarHeight,
           backgroundColor: colors.background,
           borderTopColor: colors.border + "40",
@@ -60,7 +67,7 @@ export default function TabLayout() {
         options={{
           title: "Fleet",
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="construction" label="FLEET" focused={focused} />
+            <TabIcon name="truck.fill" label="FLEET" focused={focused} />
           ),
         }}
       />
@@ -98,14 +105,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 24,
     gap: 6,
     minWidth: 100,
   },
   tabLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "800",
     letterSpacing: 0.5,
   },

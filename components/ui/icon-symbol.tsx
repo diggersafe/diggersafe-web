@@ -13,6 +13,7 @@ const MAPPING = {
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
   "construction": "construction",
+  "truck.fill": "local-shipping",
   "clipboard.fill": "assignment",
   "gearshape.fill": "settings",
   "plus": "add",
