@@ -67,7 +67,7 @@ export default function TabLayout() {
         options={{
           title: "Fleet",
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="truck.fill" label="FLEET" focused={focused} />
+            <TabIcon name="car.fill" label="FLEET" focused={focused} />
           ),
         }}
       />

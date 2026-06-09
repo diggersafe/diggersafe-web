@@ -16,29 +16,29 @@ export function AppHeader({ showSettings = false }: AppHeaderProps) {
     <View
       style={{
         backgroundColor: colors.surface,
-        paddingHorizontal: 16,
-        paddingTop: Platform.OS === "ios" ? 54 : 40,
-        paddingBottom: 14,
+        paddingHorizontal: 24,
+        paddingTop: Platform.OS === "ios" ? 60 : 44,
+        paddingBottom: 18,
         borderBottomWidth: 1,
         borderBottomColor: colors.border,
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
         <Image
           source={require("@/assets/images/icon.png")}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            marginRight: 10,
+            width: 50,
+            height: 50,
+            borderRadius: 12,
+            marginRight: 12,
           }}
           contentFit="cover"
         />
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 18, fontWeight: "800", color: colors.foreground }}>
+          <Text style={{ fontSize: 22, fontWeight: "800", color: colors.foreground }}>
             <Text style={{ color: colors.success }}>Digger</Text>Safe
           </Text>
-          <Text style={{ fontSize: 10, color: colors.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>
+          <Text style={{ fontSize: 11, color: colors.muted, letterSpacing: 1.5, textTransform: "uppercase" }}>
             Fleet & Safety
           </Text>
         </View>

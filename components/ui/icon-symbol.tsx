@@ -14,6 +14,8 @@ const MAPPING = {
   "chevron.right": "chevron-right",
   "construction": "construction",
   "truck.fill": "local-shipping",
+  "shippingbox.fill": "inventory",
+  "car.fill": "directions-car",
   "clipboard.fill": "assignment",
   "gearshape.fill": "settings",
   "plus": "add",

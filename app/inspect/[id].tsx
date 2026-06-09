@@ -71,20 +71,7 @@ function PhaseCheckItem({
             <Text style={{ fontSize: 15, fontWeight: "600", color: colors.foreground }}>
               {label}
             </Text>
-            {isCritical && (
-              <View
-                style={{
-                  backgroundColor: colors.error + "20",
-                  paddingHorizontal: 6,
-                  paddingVertical: 2,
-                  borderRadius: 4,
-                }}
-              >
-                <Text style={{ fontSize: 10, fontWeight: "700", color: colors.error }}>
-                  CRITICAL
-                </Text>
-              </View>
-            )}
+
           </View>
           <Text style={{ fontSize: 12, color: colors.muted, marginTop: 4, lineHeight: 17 }}>
             {description}

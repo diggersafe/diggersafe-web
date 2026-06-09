@@ -54,3 +54,10 @@
 - [x] Add service interval reminders & logs mention to onboarding front page
 - [x] Redesign Fleet screen with better visual hierarchy, cleaner cards, and polished layout
 - [ ] Add date confirmation step when starting pre-hire check (after entering hours)
+- [x] Tab bar redesigned to 3 separate yellow pill buttons with icons (car, clipboard, clock)
+- [x] Fixed Fleet tab centering issue
+- [x] Added car icon to Fleet tab button
+- [x] Removed red CRITICAL badges from inspection checklist items
+- [x] Made header logo and title bigger, added more spacing
+- [x] Landing page created and deployed at diggersafe-5f9fm8gn.manus.space
+- [x] Apple Developer account enrolled and App ID registered
