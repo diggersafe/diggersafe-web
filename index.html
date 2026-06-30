@@ -52,7 +52,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(26,27,31,0.92
 .hero-content{position:relative;z-index:1;max-width:720px;}
 .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:var(--green);font-size:0.82rem;font-weight:600;margin-bottom:24px;}
 .badge svg{width:14px;height:14px;}
-h1{font-size:clamp(3rem,7vw,5.5rem);font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;margin-bottom:20px;}
+h1{font-size:clamp(2.1rem,4.2vw,3.4rem);font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;margin-bottom:20px;}
 h1 .accent{color:var(--amber);}
 .hero-sub{font-size:1.1rem;color:var(--muted);max-width:520px;margin-bottom:32px;}
 .btn-row{display:flex;flex-wrap:wrap;gap:12px;}
@@ -87,8 +87,8 @@ h2{font-size:clamp(2.2rem,4vw,3.2rem);font-weight:700;text-transform:uppercase;m
 .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:48px;}
 .feat-card{background:var(--card);padding:28px 24px;}
 .feat-icon{width:36px;height:36px;color:var(--amber);margin-bottom:14px;}
-.feat-card h3{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;}
-.feat-card p{color:var(--muted);font-size:0.88rem;line-height:1.5;}
+.feat-card h3{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;color:var(--green);}
+.feat-card p{color:var(--text);font-size:0.88rem;line-height:1.5;}
 
 /* HOW IT WORKS */
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:48px;}
@@ -175,10 +175,10 @@ footer{border-top:1px solid var(--border);padding:28px 0;}
     <div class="hero-content">
       <div class="badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        WorkSafe Australia Compliant
+        Safety Compliant Inspections
       </div>
-      <h1>Stop risking <span class="accent">$50K fines</span> with paper checklists</h1>
-      <p class="hero-sub">GPS-stamped, tamper-proof digital inspections in under 2 minutes per machine. No paper. No excuses.</p>
+      <h1><span style="color:var(--text)">Pre-checks, service logs</span><br>& reminders. <span class="accent">All in one place.</span></h1>
+      <p class="hero-sub" style="color:var(--text)">DiggerSafe makes pre-hire machine inspections <span style="color:var(--green)">quick and easy.</span> Keep every machine's service history right there on your phone.</p>
       <div class="btn-row">
         <a href="#pricing" class="btn btn-amber btn-lg">Download Free →</a>
         <a href="#how" class="btn btn-outline btn-lg">See How It Works</a>
@@ -192,7 +192,7 @@ footer{border-top:1px solid var(--border);padding:28px 0;}
   <div class="container">
     <div class="stats-grid">
       <div class="stat"><div class="stat-val">2 min</div><div class="stat-label">Per Inspection</div></div>
-      <div class="stat"><div class="stat-val">100%</div><div class="stat-label">WorkSafe Compliant</div></div>
+      <div class="stat"><div class="stat-val">100%</div><div class="stat-label">Safety Compliant</div></div>
       <div class="stat"><div class="stat-val">GPS</div><div class="stat-label">Tamper-Proof</div></div>
       <div class="stat"><div class="stat-val">$0</div><div class="stat-label">To Start</div></div>
     </div>
@@ -231,8 +231,8 @@ footer{border-top:1px solid var(--border);padding:28px 0;}
     <div class="features-grid">
       <div class="feat-card">
         <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <h3>3-Phase WorkSafe Inspections</h3>
-        <p>Walk-around, cabin, and operational checks — exactly how WorkSafe expects them.</p>
+        <h3>3-Phase Safety Inspections</h3>
+        <p>Walk-around, cabin, and operational checks — built to meet workplace safety standards.</p>
       </div>
       <div class="feat-card">
         <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -241,8 +241,8 @@ footer{border-top:1px solid var(--border);padding:28px 0;}
       </div>
       <div class="feat-card">
         <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-        <h3>Service Interval Alerts</h3>
-        <p>Track hour meters. Get alerts for oil, greasing, and major services.</p>
+        <h3>Automatic Service Reminders</h3>
+        <p>Track hour meters and get automatic alerts for oil, greasing, and major services — no spreadsheets, no forgetting.</p>
       </div>
       <div class="feat-card">
         <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -371,15 +371,14 @@ footer{border-top:1px solid var(--border);padding:28px 0;}
     <h2>Your next audit is coming.<br><span style="color:var(--amber)">Be ready.</span></h2>
     <p style="color:var(--muted);font-size:1.05rem;max-width:420px;margin:12px auto 0;">Download DiggerSafe free and run your first inspection in under 2 minutes.</p>
     <div class="store-row">
-      <span class="store-btn">📱 App Store</span>
-      <span class="store-btn">▶ Google Play</span>
+      <a href="#pricing" class="btn btn-amber btn-lg">Download Free →</a>
     </div>
   </div>
 </section>
 
 <footer>
   <div class="container footer-inner">
-    <span>© 2026 DiggerSafe. Built for Australian earthmoving operators.</span>
+    <span>© 2026 DiggerSafe. Built for earthmoving operators everywhere.</span>
     <div class="footer-links">
       <a href="#">Privacy Policy</a>
       <a href="#">Terms of Service</a>
