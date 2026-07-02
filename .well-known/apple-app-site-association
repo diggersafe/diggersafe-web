@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "539DD5SM6K.com.app.diggersafemobileapp",
+        "paths": ["*"]
+      }
+    ]
+  }
+}

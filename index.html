@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiggerSafe — Fleet Safety & Service</title>
+<meta name="description" content="WorkSafe-compliant pre-hire machinery inspections. GPS-stamped, tamper-proof, done in under 2 minutes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#1a1b1f;
+  --card:#20222a;
+  --border:#2e3040;
+  --amber:#f5a623;
+  --amber-dark:#d4891a;
+  --green:#4ade80;
+  --text:#f0f0ee;
+  --muted:#8a8ea0;
+  --secondary:#252730;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4{font-family:'Barlow Condensed',sans-serif;line-height:1.05;}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+.container{width:100%;max-width:1200px;margin:0 auto;padding:0 1.5rem;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(26,27,31,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo img{height:80px;width:auto;}
+.logo-text{display:flex;flex-direction:column;justify-content:center;}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-size:1.9rem;font-weight:800;line-height:1;letter-spacing:0.01em;}
+.logo-name .digger{color:var(--green);}
+.logo-name .safe{color:var(--text);}
+.logo-sub{font-size:0.65rem;color:var(--text);letter-spacing:0.12em;text-transform:uppercase;margin-top:3px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:'DM Sans',sans-serif;font-weight:600;border-radius:8px;cursor:pointer;transition:all .15s;border:none;text-decoration:none;}
+.btn-amber{background:var(--amber);color:#111;padding:10px 20px;font-size:0.9rem;}
+.btn-amber:hover{background:var(--amber-dark);}
+.btn-lg{padding:14px 28px;font-size:1rem;}
+.btn-outline{background:transparent;color:var(--text);border:1.5px solid var(--border);padding:13px 26px;font-size:1rem;}
+.btn-outline:hover{border-color:var(--amber);color:var(--amber);}
+
+/* HERO */
+.hero{position:relative;padding:120px 0 80px;}
+.hero-bg{position:absolute;inset:0;z-index:0;}
+.hero-bg img{width:100%;height:100%;object-fit:cover;opacity:0.3;}
+.hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom, rgba(26,27,31,0.5) 0%, rgba(26,27,31,0.8) 60%, var(--bg) 100%);}
+.hero-content{position:relative;z-index:1;max-width:720px;}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:var(--green);font-size:0.82rem;font-weight:600;margin-bottom:24px;}
+.badge svg{width:14px;height:14px;}
+h1{font-size:clamp(2.1rem,4.2vw,3.4rem);font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;margin-bottom:20px;}
+h1 .accent{color:var(--amber);}
+.hero-sub{font-size:1.1rem;color:var(--muted);max-width:520px;margin-bottom:32px;}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;}
+
+/* STATS */
+.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(37,39,48,0.5);}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:28px 0;}
+.stat{text-align:center;padding:8px 16px;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:700;color:var(--amber);}
+.stat-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+
+/* SECTIONS */
+section{padding:80px 0;}
+.eyebrow{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
+.eyebrow-amber{color:var(--amber);}
+.eyebrow-green{color:var(--green);}
+h2{font-size:clamp(2.2rem,4vw,3.2rem);font-weight:700;text-transform:uppercase;margin-bottom:16px;}
+.section-sub{color:var(--muted);font-size:1.05rem;max-width:540px;margin-bottom:40px;}
+
+/* TWO-COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.two-col.reverse .col-text{order:2;}
+.two-col.reverse .col-img{order:1;}
+.col-img img{border-radius:12px;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.checklist{list-style:none;display:flex;flex-direction:column;gap:12px;margin-top:24px;}
+.checklist li{display:flex;align-items:flex-start;gap:12px;font-size:0.97rem;}
+.checklist li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px;}
+
+/* FEATURES GRID */
+.bg-secondary{background:rgba(37,39,48,0.4);}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:48px;}
+.feat-card{background:var(--card);padding:28px 24px;}
+.feat-icon{width:36px;height:36px;color:var(--amber);margin-bottom:14px;}
+.feat-card h3{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;color:var(--green);}
+.feat-card p{color:var(--text);font-size:0.88rem;line-height:1.5;}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:48px;}
+.step{text-align:center;}
+.step-num{width:56px;height:56px;border-radius:50%;background:rgba(245,166,35,0.1);border:2px solid var(--amber);color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-size:1.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.step h3{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;}
+.step p{color:var(--muted);font-size:0.9rem;}
+
+/* PILLS */
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;background:var(--card);border:1px solid var(--border);font-size:0.85rem;}
+.pill::before{content:"✓";color:var(--green);font-weight:700;}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;margin:48px auto 0;}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 24px;display:flex;flex-direction:column;}
+.price-card.popular{border-color:var(--amber);position:relative;transform:translateY(-8px);}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--amber);color:#111;font-size:0.68rem;font-weight:700;padding:4px 12px;border-radius:100px;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;}
+.price-label{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;}
+.price-audience{font-size:0.82rem;color:var(--muted);margin-bottom:16px;}
+.price-amount{font-family:'Barlow Condensed',sans-serif;font-size:2.6rem;font-weight:700;margin-bottom:20px;}
+.price-card.popular .price-amount{color:var(--amber);}
+.price-amount span{font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:400;color:var(--muted);}
+.price-features{list-style:none;flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.price-features li{display:flex;align-items:flex-start;gap:10px;font-size:0.87rem;}
+.price-features li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0;}
+.btn-outline-full{width:100%;text-align:center;display:block;background:transparent;color:var(--text);border:1.5px solid var(--border);padding:12px 0;border-radius:8px;font-weight:600;font-size:0.9rem;transition:all .15s;cursor:pointer;}
+.btn-outline-full:hover{border-color:var(--amber);color:var(--amber);}
+.btn-amber-full{width:100%;text-align:center;display:block;background:var(--amber);color:#111;padding:12px 0;border-radius:8px;font-weight:700;font-size:0.9rem;transition:all .15s;cursor:pointer;}
+.btn-amber-full:hover{background:var(--amber-dark);}
+
+/* CTA */
+.cta-section{text-align:center;border-top:1px solid var(--border);}
+.cta-icon{font-size:2.5rem;margin-bottom:16px;}
+.store-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:32px;}
+.store-btn{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:10px;background:var(--card);border:1px solid var(--border);font-size:0.9rem;font-weight:600;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:28px 0;}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:0.83rem;color:var(--muted);}
+.footer-links{display:flex;gap:20px;}
+.footer-links a:hover{color:var(--text);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .two-col{grid-template-columns:1fr;}
+  .two-col.reverse .col-text,.two-col.reverse .col-img{order:unset;}
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .steps{grid-template-columns:1fr;}
+  .pricing-grid{grid-template-columns:1fr;}
+  .price-card.popular{transform:none;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .stat{border-right:none;border-bottom:1px solid var(--border);}
+  .stat:nth-child(3),.stat:nth-child(4){border-bottom:none;}
+}
+@media(max-width:600px){
+  .features-grid{grid-template-columns:1fr;}
+  h1{font-size:2.8rem;}
+  .logo-text{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <div class="logo">
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663677202891/qYDicMTofnCtabFm.png" alt="DiggerSafe">
+      <div class="logo-text">
+        <span class="logo-name"><span class="digger">Digger</span><span class="safe">Safe</span></span>
+        <span class="logo-sub">Fleet Safety & Service</span>
+      </div>
+    </div>
+    <a href="#pricing" class="btn btn-amber">Download Free</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663677202891/nxGUVWVDtxUZZKKgPQt43q/hero-excavator-nHsDuqm8ZxzrviVNaC8kYD.webp" alt="">
+  </div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Safety Compliant Inspections
+      </div>
+      <h1><span style="color:var(--text)">Pre-checks, service logs</span><br>& reminders. <span class="accent">All in one place.</span></h1>
+      <p class="hero-sub" style="color:var(--text)">DiggerSafe makes pre-hire machine inspections <span style="color:var(--green)">quick and easy.</span> Keep every machine's service history right there on your phone.</p>
+      <div class="btn-row">
+        <a href="#pricing" class="btn btn-amber btn-lg">Download Free →</a>
+        <a href="#how" class="btn btn-outline btn-lg">See How It Works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-val">2 min</div><div class="stat-label">Per Inspection</div></div>
+      <div class="stat"><div class="stat-val">100%</div><div class="stat-label">Safety Compliant</div></div>
+      <div class="stat"><div class="stat-val">GPS</div><div class="stat-label">Tamper-Proof</div></div>
+      <div class="stat"><div class="stat-val">$0</div><div class="stat-label">To Start</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- QR STICKER -->
+<section>
+  <div class="container">
+    <div class="two-col">
+      <div class="col-text">
+        <p class="eyebrow eyebrow-amber">New Feature</p>
+        <h2>QR Stickers.<br><span style="color:var(--amber)">Scan. Inspect. Done.</span></h2>
+        <p class="section-sub">Stick a weatherproof QR code on every machine. Your crew scans it with their phone — the right inspection loads instantly. No searching. No mistakes.</p>
+        <ul class="checklist">
+          <li>Weatherproof vinyl stickers included free</li>
+          <li>Instant machine identification — no typing</li>
+          <li>Links directly to that machine's inspection form</li>
+          <li>Works offline — syncs when back in range</li>
+        </ul>
+      </div>
+      <div class="col-img">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663677202891/nxGUVWVDtxUZZKKgPQt43q/qr-sticker-feature-niE3iiRMXxRAzU8iVR97K9.webp" alt="QR sticker scanning on excavator">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-secondary" id="how">
+  <div class="container">
+    <div style="text-align:center">
+      <p class="eyebrow eyebrow-amber">The Solution</p>
+      <h2>Everything you need. Nothing you don't.</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <h3>3-Phase Safety Inspections</h3>
+        <p>Walk-around, cabin, and operational checks — built to meet workplace safety standards.</p>
+      </div>
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <h3>GPS + Auto Timestamp</h3>
+        <p>Every inspection locked with location and time. No backdating. Audit-proof.</p>
+      </div>
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <h3>Automatic Service Reminders</h3>
+        <p>Track hour meters and get automatic alerts for oil, greasing, and major services — no spreadsheets, no forgetting.</p>
+      </div>
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <h3>Service History & Logs</h3>
+        <p>Complete maintenance records for every machine — all in one place.</p>
+      </div>
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <h3>Instant PDF Reports</h3>
+        <p>One tap to generate professional reports. Share with clients or auditors.</p>
+      </div>
+      <div class="feat-card">
+        <svg class="feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <h3>Cloud Backup</h3>
+        <p>Auto-sync to the cloud. Phone dies? Your data is safe on any device.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="container">
+    <div style="text-align:center">
+      <p class="eyebrow eyebrow-green">Dead Simple</p>
+      <h2>Three taps to compliance</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Select Machine</h3>
+        <p>Tap from your fleet list or scan its QR sticker</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Run Checks</h3>
+        <p>Tap through the 3-phase inspection — pass, fail, or flag No-Go</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Done</h3>
+        <p>GPS-stamped record saved. PDF ready. Machine cleared.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP SCREENSHOT -->
+<section class="bg-secondary">
+  <div class="container">
+    <div class="two-col reverse">
+      <div class="col-img" style="display:flex;justify-content:center;">
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663677202891/nxGUVWVDtxUZZKKgPQt43q/app-inspection-LUXRF2NkZG6Ea4D747cW7z.webp" alt="DiggerSafe app" style="max-width:280px;border-radius:20px;">
+      </div>
+      <div class="col-text">
+        <h2>Built for blokes<br><span style="color:var(--green)">on the tools.</span></h2>
+        <p class="section-sub">Big buttons. Clear layout. Works with dirty hands and cracked screens. No training needed — if you can use a phone, you can use DiggerSafe.</p>
+        <div class="pills">
+          <span class="pill">Works offline</span>
+          <span class="pill">iPhone & Android</span>
+          <span class="pill">No login required</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div style="text-align:center">
+      <h2>Simple pricing. No surprises.</h2>
+      <p style="color:var(--muted);font-size:1.05rem;margin-top:8px;">Start free for 14 days. No credit card required.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-label">Starter</div>
+        <div class="price-audience">For owner-operators</div>
+        <div class="price-amount">$4.99<span>/month</span></div>
+        <ul class="price-features">
+          <li>Up to 2 machines</li>
+          <li>Unlimited inspections</li>
+          <li>GPS stamping</li>
+          <li>PDF reports</li>
+          <li>Cloud backup</li>
+        </ul>
+        <a href="#" class="btn-outline-full">Start Free Trial</a>
+      </div>
+      <div class="price-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="price-label">Basic</div>
+        <div class="price-audience">For small fleets</div>
+        <div class="price-amount">$9.99<span>/month</span></div>
+        <ul class="price-features">
+          <li>Up to 10 machines</li>
+          <li>Unlimited inspections</li>
+          <li>Service interval alerts</li>
+          <li>Maintenance logs</li>
+          <li>QR stickers included</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="btn-amber-full">Start Free Trial</a>
+      </div>
+      <div class="price-card">
+        <div class="price-label">Pro</div>
+        <div class="price-audience">For growing fleets</div>
+        <div class="price-amount">$24.99<span>/month</span></div>
+        <ul class="price-features">
+          <li>Unlimited machines</li>
+          <li>Everything in Basic</li>
+          <li>Multi-user access</li>
+          <li>Custom inspection forms</li>
+          <li>API access</li>
+          <li>Dedicated support</li>
+        </ul>
+        <a href="#" class="btn-outline-full">Start Free Trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section bg-secondary">
+  <div class="container">
+    <div class="cta-icon">⚠️</div>
+    <h2>Your next audit is coming.<br><span style="color:var(--amber)">Be ready.</span></h2>
+    <p style="color:var(--muted);font-size:1.05rem;max-width:420px;margin:12px auto 0;">Download DiggerSafe free and run your first inspection in under 2 minutes.</p>
+    <div class="store-row">
+      <a href="#pricing" class="btn btn-amber btn-lg">Download Free →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-inner">
+    <span>© 2026 DiggerSafe. Built for earthmoving operators everywhere.</span>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="mailto:support@diggersafe.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
