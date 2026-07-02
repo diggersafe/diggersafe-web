@@ -289,10 +289,11 @@ export default function SettingsScreen() {
             DiggerSafe Fleet & Safety v1.0.0
           </Text>
           <Text style={{ fontSize: 11, color: colors.muted + "80", textAlign: "center", marginTop: 4 }}>
-            WorkSafe compliant pre-hire inspections
+            WorkSafe compliant Pre-Start inspections
           </Text>
         </View>
       </ScrollView>
     </ScreenContainer>
   );
 }
+

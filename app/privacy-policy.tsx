@@ -96,3 +96,4 @@ function Section({ title, children, colors }: { title: string; children: React.R
     </View>
   );
 }
+

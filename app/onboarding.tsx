@@ -22,7 +22,7 @@ export default function OnboardingScreen() {
       const Haptics = await import("expo-haptics");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    router.replace("/(tabs)");
+    setTimeout(() => router.replace("/(tabs)"), 100);
   };
 
   return (
@@ -45,7 +45,7 @@ export default function OnboardingScreen() {
                 <Text style={{ color: colors.foreground }}>Safe</Text>
               </Text>
               <Text style={{ fontSize: 15, color: colors.muted, textAlign: "center", marginTop: 12, lineHeight: 22 }}>
-                WorkSafe-compliant pre-hire inspections{"\n"}for your fleet
+                Safe Work compliant Pre-Start inspections{"\n"}for your fleet
               </Text>
 
               <View style={{ marginTop: 40, width: "100%" }}>
@@ -53,7 +53,7 @@ export default function OnboardingScreen() {
                   <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.success + "20", alignItems: "center", justifyContent: "center" }}>
                     <MaterialIcons name="check-circle" size={22} color={colors.success} />
                   </View>
-                  <Text style={{ fontSize: 14, color: colors.foreground, marginLeft: 12 }}>3-phase WorkSafe pre-hire checks</Text>
+                  <Text style={{ fontSize: 14, color: colors.foreground, marginLeft: 12 }}>2-phase Safe Work Pre-Start checks</Text>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
                   <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary + "20", alignItems: "center", justifyContent: "center" }}>
@@ -179,3 +179,4 @@ export default function OnboardingScreen() {
     </ScreenContainer>
   );
 }
+

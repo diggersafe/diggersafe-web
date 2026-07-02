@@ -214,7 +214,7 @@ export default function HistoryScreen() {
           <MaterialIcons name="assignment" size={64} color={colors.muted + "40"} />
           <Text style={{ fontSize: 16, color: colors.muted, marginTop: 12, textAlign: "center" }}>
             {inspections.length === 0
-              ? "No inspections yet.\nComplete a pre-hire check to see it here."
+              ? "No inspections yet.\nComplete a Pre-Start check to see it here."
               : "No inspections match your filters."}
           </Text>
         </View>
@@ -238,3 +238,4 @@ export default function HistoryScreen() {
     </ScreenContainer>
   );
 }
+

@@ -209,7 +209,7 @@ export default function MachineDetailScreen() {
           );
         })()}
 
-        {/* Start Pre-Hire Check Button */}
+        {/* Start Pre-Start Check Button */}
         <TouchableOpacity
           onPress={() => guardAction(() => router.push(`/inspect/${machine.id}` as any))}
           activeOpacity={0.8}
@@ -226,7 +226,7 @@ export default function MachineDetailScreen() {
         >
           <MaterialIcons name={canWrite ? "assignment" : "lock"} size={22} color="#1A1A1A" />
           <Text style={{ fontSize: 17, fontWeight: "700", color: "#1A1A1A" }}>
-            Start Pre-Hire Check
+            Start Pre-Start Check
           </Text>
         </TouchableOpacity>
 

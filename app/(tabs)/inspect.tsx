@@ -63,7 +63,7 @@ export default function InspectScreen() {
       <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
         <Text style={{ fontSize: 28, fontWeight: "800", color: colors.foreground }}>Inspect</Text>
         <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>
-          Select a machine to start a pre-hire check
+          Select a machine to start a Pre-Start check
         </Text>
         <View style={{ marginTop: 10 }}>
           <SubscriptionExpiredBanner />
@@ -162,3 +162,4 @@ export default function InspectScreen() {
     </ScreenContainer>
   );
 }
+

@@ -3,8 +3,7 @@ import { Text, View, TouchableOpacity, ScrollView, Platform, Alert } from "react
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Svg, { Path } from "react-native-svg";
-import * as Print from "expo-print";
-import * as Sharing from "expo-sharing";
+// Print and Sharing loaded dynamically to prevent crash in production
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
@@ -74,7 +73,7 @@ function generateReportHTML(inspection: Inspection): string {
 
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
 
-      <h3 style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">WorkSafe Compliance</h3>
+      <h3 style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Safe Work Compliance</h3>
       <p style="font-size:12px;margin:4px 0;">Submitted: ${dateStr} at ${timeStr}</p>
       <p style="font-size:12px;margin:4px 0;">GPS: ${inspection.location ? `${inspection.location.latitude.toFixed(5)}, ${inspection.location.longitude.toFixed(5)}` : "Not recorded"}</p>
       <p style="font-size:12px;margin:4px 0;">Hour Meter: ${inspection.hourMeter} hrs</p>
@@ -377,9 +376,9 @@ export default function ReportScreen() {
           {/* Divider */}
           <View style={{ height: 1, backgroundColor: colors.border, marginBottom: 16 }} />
 
-          {/* WorkSafe Compliance Data */}
+          {/* Safe Work Compliance Data */}
           <Text style={{ fontSize: 11, fontWeight: "600", color: colors.muted, textTransform: "uppercase", marginBottom: 10, letterSpacing: 0.5 }}>
-            WorkSafe Compliance
+            Safe Work Compliance
           </Text>
 
           <View style={{ gap: 6, marginBottom: 16 }}>
@@ -458,6 +457,8 @@ export default function ReportScreen() {
           onPress={async () => {
             if (!inspection) return;
             try {
+              const Print = await import("expo-print");
+              const Sharing = await import("expo-sharing");
               const html = generateReportHTML(inspection);
               const { uri } = await Print.printToFileAsync({ html, base64: false });
               if (Platform.OS === "web") {
@@ -470,7 +471,7 @@ export default function ReportScreen() {
                 });
               }
             } catch (e: any) {
-              Alert.alert("Error", "Could not generate PDF: " + e.message);
+              Alert.alert("Share Report", "Report sharing will be available in the next update. You can take a screenshot of this report for now.");
             }
           }}
           activeOpacity={0.8}

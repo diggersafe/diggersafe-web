@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Text,
   View,
@@ -7,11 +7,10 @@ import {
   ScrollView,
   Alert,
   Platform,
-  Image,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
@@ -67,7 +66,7 @@ function PhaseCheckItem({
     >
       <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
         <View style={{ flex: 1, marginRight: 12 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <View style={{ flexDirection: "column", alignItems: "center", gap: 10 }}>
             <Text style={{ fontSize: 15, fontWeight: "600", color: colors.foreground }}>
               {label}
             </Text>
@@ -77,24 +76,24 @@ function PhaseCheckItem({
             {description}
           </Text>
         </View>
-        <View style={{ flexDirection: "row", gap: 6 }}>
+        <View style={{ flexDirection: "column", gap: 10 }}>
           <TouchableOpacity
             onPress={() => onToggle("pass")}
             activeOpacity={0.7}
             style={{
               paddingHorizontal: 12,
-              paddingVertical: 8,
-              borderRadius: 8,
-              backgroundColor: result === "pass" ? colors.success + "20" : "transparent",
+              paddingVertical: 18,
+              borderRadius: 12,
+              backgroundColor: result === "pass" ? colors.success : "transparent",
               borderWidth: 1,
-              borderColor: result === "pass" ? colors.success : colors.border,
+              borderColor: colors.success,
             }}
           >
             <Text
               style={{
-                fontSize: 12,
-                fontWeight: "600",
-                color: result === "pass" ? colors.success : colors.muted,
+                fontSize: 18,
+                fontWeight: "700",
+                color: result === "pass" ? "#FFFFFF" : colors.success,
               }}
             >
               Pass
@@ -105,18 +104,18 @@ function PhaseCheckItem({
             activeOpacity={0.7}
             style={{
               paddingHorizontal: 12,
-              paddingVertical: 8,
-              borderRadius: 8,
-              backgroundColor: result === "fail" ? colors.error + "20" : "transparent",
-              borderWidth: 1,
-              borderColor: result === "fail" ? colors.error : colors.border,
+              paddingVertical: 18,
+              borderRadius: 12,
+              backgroundColor: result === "fail" ? colors.error : "transparent",
+              borderWidth: 3,
+              borderColor: colors.error,
             }}
           >
             <Text
               style={{
-                fontSize: 12,
-                fontWeight: "600",
-                color: result === "fail" ? colors.error : colors.muted,
+                fontSize: 18,
+                fontWeight: "700",
+                color: result === "fail" ? "#FFFFFF" : colors.error,
               }}
             >
               Fail
@@ -144,7 +143,7 @@ function PhaseCheckItem({
               padding: 10,
               fontSize: 13,
               color: colors.foreground,
-              borderWidth: 1,
+              borderWidth: 3,
               borderColor: colors.error + "40",
               minHeight: 60,
               textAlignVertical: "top",
@@ -175,9 +174,7 @@ function PhaseCheckItem({
               {photoUri ? "Photo attached" : (isCritical ? "Take photo (required)" : "Take photo (optional)")}
             </Text>
           </TouchableOpacity>
-          {photoUri && (
-            <Image source={{ uri: photoUri }} style={{ width: "100%", height: 120, borderRadius: 8, marginTop: 8 }} resizeMode="cover" />
-          )}
+
         </View>
       )}
     </View>
@@ -187,9 +184,11 @@ function PhaseCheckItem({
 export default function InspectionScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, company } = useLocalSearchParams<{ id: string; company?: string }>();
   const [machine, setMachine] = useState<Machine | null>(null);
   const [hourMeter, setHourMeter] = useState("");
+  const [workerName, setWorkerName] = useState("");
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [currentPhase, setCurrentPhase] = useState(0); // 0 = hour meter, 1-3 = phases
   const [checks, setChecks] = useState<SafetyCheck[]>(
     ALL_CHECK_ITEMS.map((item) => ({
@@ -214,6 +213,18 @@ export default function InspectionScreen() {
     }, [id])
   );
 
+  useEffect(() => {
+  const checkWorkerName = async () => {
+    const stored = await AsyncStorage.getItem("workerName");
+    if (stored) {
+      setWorkerName(stored);
+    } else {
+      setShowNamePrompt(true);
+    }
+  };
+  checkWorkerName();
+}, []);
+
   const handleToggle = (checkIndex: number, result: CheckResult) => {
     setChecks((prev) => {
       const updated = [...prev];
@@ -231,37 +242,7 @@ export default function InspectionScreen() {
   };
 
   const handlePhotoCapture = async (checkIndex: number) => {
-    if (Platform.OS !== "web") {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Camera Permission", "Camera access is needed to take evidence photos.");
-        return;
-      }
-      const result = await ImagePicker.launchCameraAsync({
-        quality: 0.7,
-        allowsEditing: false,
-      });
-      if (!result.canceled && result.assets[0]) {
-        setChecks((prev) => {
-          const updated = [...prev];
-          updated[checkIndex] = { ...updated[checkIndex], photoUri: result.assets[0].uri };
-          return updated;
-        });
-      }
-    } else {
-      // On web, use image library picker instead of camera
-      const result = await ImagePicker.launchImageLibraryAsync({
-        quality: 0.7,
-        allowsEditing: false,
-      });
-      if (!result.canceled && result.assets[0]) {
-        setChecks((prev) => {
-          const updated = [...prev];
-          updated[checkIndex] = { ...updated[checkIndex], photoUri: result.assets[0].uri };
-          return updated;
-        });
-      }
-    }
+    Alert.alert("Photo Evidence", "Photo capture will be available in the next update.");
   };
 
   // Get checks for current phase
@@ -289,7 +270,7 @@ export default function InspectionScreen() {
         return;
       }
       setCurrentPhase(1);
-    } else if (currentPhase < 3) {
+    } else if (currentPhase < 2) {
       if (!canAdvancePhase) {
         Alert.alert("Incomplete", "All items must be checked. Failed items require a comment. Critical fails also require a photo.");
         return;
@@ -350,7 +331,37 @@ export default function InspectionScreen() {
   const totalCompleted = checks.filter((c) => c.result !== "pending").length;
   const totalItems = checks.length;
 
+  if (showNamePrompt) {
   return (
+    <ScreenContainer className="p-4">
+      <View style={{ flex: 1, justifyContent: "center", padding: 24 }}>
+        <Text style={{ fontSize: 22, fontWeight: "700", color: colors.foreground, marginBottom: 8 }}>Welcome to DiggerSafe</Text>
+        <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 24 }}>Enter your name — you'll only need to do this once.</Text>
+        <TextInput
+          value={workerName}
+          onChangeText={setWorkerName}
+          placeholder="Your full name"
+          placeholderTextColor={colors.muted}
+          style={{ backgroundColor: colors.surface, borderRadius: 8, padding: 12, fontSize: 16, color: colors.foreground, borderWidth: 1, borderColor: colors.muted, marginBottom: 16 }}
+        />
+        <TouchableOpacity
+          onPress={async () => {
+            if (!workerName.trim()) return;
+            await AsyncStorage.setItem("workerName", workerName.trim());
+            setWorkerName(workerName.trim());
+            setShowNamePrompt(false);
+          }}
+          style={{ backgroundColor: colors.primary, borderRadius: 10, padding: 14, alignItems: "center" }}
+        >
+          <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>Start Inspecting</Text>
+        </TouchableOpacity>
+      </View>
+    </ScreenContainer>
+  );
+}
+
+  return (
+    
     <ScreenContainer className="px-4 pt-2">
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header */}
@@ -364,7 +375,7 @@ export default function InspectionScreen() {
         </TouchableOpacity>
 
         <Text style={{ fontSize: 22, fontWeight: "800", color: colors.foreground }}>
-          Pre-Hire Check
+          Pre-Start Check
         </Text>
         <Text style={{ fontSize: 14, color: colors.muted, marginBottom: 4 }}>
           {machine.assetId} — {machine.makeModel}
@@ -406,7 +417,7 @@ export default function InspectionScreen() {
               }}
             >
               <Text style={{ fontSize: 14, fontWeight: "600", color: colors.primary, marginBottom: 4 }}>
-                WorkSafe Compliance
+                Safe Work Compliance
               </Text>
               <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 18 }}>
                 Engine hour reading is compulsory for aligning this precheck with service records. GPS location and timestamp will be recorded automatically.
@@ -473,7 +484,7 @@ export default function InspectionScreen() {
 
             {/* Phase step indicator */}
             <View style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginBottom: 16 }}>
-              {[1, 2, 3].map((phase) => (
+              {[1, 2].map((phase) => (
                 <View
                   key={phase}
                   style={{

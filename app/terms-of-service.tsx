@@ -33,7 +33,7 @@ export default function TermsOfServiceScreen() {
         </Section>
 
         <Section title="2. Description of Service" colors={colors}>
-          DiggerSafe is a digital tool designed to assist operators in conducting pre-hire safety inspections of earthmoving and construction equipment. The App generates digital inspection records that may assist with WorkSafe compliance documentation.
+          DiggerSafe is a digital tool designed to assist operators in conducting Pre-Start safety inspections of earthmoving and construction equipment. The App generates digital inspection records that may assist with WorkSafe compliance documentation.
         </Section>
 
         <Section title="3. Disclaimer of Liability" colors={colors}>
@@ -102,3 +102,4 @@ function Section({ title, children, colors }: { title: string; children: React.R
     </View>
   );
 }
+
