@@ -233,6 +233,8 @@ export default function InspectionScreen() {
       updated[checkIndex] = { ...updated[checkIndex], result, notes: result === "pass" ? "" : updated[checkIndex].notes };
       return updated;
     });
+    
+
   };
 
   const handleNotesChange = (checkIndex: number, notes: string) => {
@@ -264,7 +266,7 @@ export default function InspectionScreen() {
       try {
         await FileSystem.copyAsync({ from: tempUri, to: permanentUri });
       } catch (e) {
-        console.log("Photo copy failed:", e);
+        Alert.alert("Photo Copy Debug", "Copy failed: " + JSON.stringify(e));
         finalUri = tempUri;
       }
 
