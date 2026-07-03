@@ -260,13 +260,15 @@ export default function InspectionScreen() {
       const fileName = `inspection_photo_${Date.now()}.jpg`;
       const permanentUri = `${FileSystem.documentDirectory}${fileName}`;
 
+       let finalUri = permanentUri;
       try {
         await FileSystem.copyAsync({ from: tempUri, to: permanentUri });
-      } catch {
-        // fallback to temp uri if copy fails
+      } catch (e) {
+        console.log("Photo copy failed:", e);
+        finalUri = tempUri;
       }
 
-      const finalUri = permanentUri;
+    
       setChecks((prev) => {
         const updated = [...prev];
         updated[checkIndex] = { ...updated[checkIndex], photoUri: finalUri };

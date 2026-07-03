@@ -13,7 +13,8 @@ async function photoToBase64(uri?: string): Promise<string | null> {
     try {
       const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
       return `data:image/jpeg;base64,${base64}`;
-    } catch {
+    } catch (e) {
+      console.log("Photo read failed for URI:", uri, "Error:", e);
       return null;
     }
   }
