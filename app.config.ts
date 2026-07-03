@@ -41,6 +41,7 @@ const env = {
 const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
+  owner: "diggersafes-team",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
@@ -51,8 +52,10 @@ const config: ExpoConfig = {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
     "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+  "ITSAppUsesNonExemptEncryption": false,
+  "NSLocationWhenInUseUsageDescription": "DiggerSafe uses your location to timestamp and verify where each pre-start inspection was completed, for compliance records."
+},
+      associatedDomains: ["applinks:diggersafe.com"]
   },
   android: {
     adaptiveIcon: {
@@ -86,6 +89,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
+    "expo-iap",
     [
       "expo-audio",
       {
@@ -121,6 +125,11 @@ const config: ExpoConfig = {
       },
     ],
   ],
+  extra: {
+    eas: {
+      projectId: "7def7fef-494b-4170-a686-3ad5ddfaa37b",
+    },
+  },
   experiments: {
     typedRoutes: true,
     reactCompiler: true,

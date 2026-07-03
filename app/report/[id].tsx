@@ -4,19 +4,32 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Svg, { Path } from "react-native-svg";
 // Print and Sharing loaded dynamically to prevent crash in production
-
+import * as FileSystem from "expo-file-system";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { getInspections, INSPECTION_PHASES, type Inspection } from "@/lib/store";
-
-function generateReportHTML(inspection: Inspection): string {
+async function photoToBase64(uri?: string): Promise<string | null> {
+    if (!uri) return null;
+    try {
+      const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+      return `data:image/jpeg;base64,${base64}`;
+    } catch {
+      return null;
+    }
+  }
+async function generateReportHTML(inspection: Inspection): Promise<string> {
   const dateStr = new Date(inspection.date).toLocaleDateString("en-AU", {
     day: "2-digit", month: "short", year: "numeric",
   });
   const timeStr = inspection.timestamp
     ? new Date(inspection.timestamp).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
     : "N/A";
-
+const photoDataUris: Record<string, string | null> = {};
+for (const check of inspection.checks) {
+  if (check.photoUri) {
+    photoDataUris[check.category] = await photoToBase64(check.photoUri);
+  }
+}
   let signatureSvg = "";
   try {
     const paths = JSON.parse(inspection.signatureBase64) as string[];
@@ -39,6 +52,7 @@ function generateReportHTML(inspection: Inspection): string {
             </td>
           </tr>
           ${check.result === "fail" && check.notes ? `<tr><td colspan="2" style="padding:2px 0 8px 12px;font-size:11px;color:#EF4444;font-style:italic;">Note: ${check.notes}</td></tr>` : ""}
+              ${check.result === "fail" && check.photoUri && photoDataUris[check.category] ? `<tr><td colspan="2" style="padding:2px 0 12px 12px;"><img src="${photoDataUris[check.category]}" style="width:80mm;height:auto;border-radius:6px;border:1px solid #ddd;" /></td></tr>` : ""}
         `).join("")}
       </table>
     `;
@@ -459,7 +473,7 @@ export default function ReportScreen() {
             try {
               const Print = await import("expo-print");
               const Sharing = await import("expo-sharing");
-              const html = generateReportHTML(inspection);
+              const html = await generateReportHTML(inspection);
               const { uri } = await Print.printToFileAsync({ html, base64: false });
               if (Platform.OS === "web") {
                 await Print.printAsync({ html });
