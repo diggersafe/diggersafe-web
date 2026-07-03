@@ -10,11 +10,13 @@ import {
 } from "react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import {
+  
   getMachines,
   getSettings,
   INSPECTION_PHASES,
@@ -254,10 +256,20 @@ export default function InspectionScreen() {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      const photoUri = result.assets[0].uri;
+      const tempUri = result.assets[0].uri;
+      const fileName = `inspection_photo_${Date.now()}.jpg`;
+      const permanentUri = `${FileSystem.documentDirectory}${fileName}`;
+
+      try {
+        await FileSystem.copyAsync({ from: tempUri, to: permanentUri });
+      } catch {
+        // fallback to temp uri if copy fails
+      }
+
+      const finalUri = permanentUri;
       setChecks((prev) => {
         const updated = [...prev];
-        updated[checkIndex] = { ...updated[checkIndex], photoUri };
+        updated[checkIndex] = { ...updated[checkIndex], photoUri: finalUri };
         return updated;
       });
     }
