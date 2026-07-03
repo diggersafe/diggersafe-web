@@ -67,7 +67,7 @@ export default function SubscribeScreen() {
     if (Platform.OS === "web") {
       Alert.alert(
         "Subscribe via App",
-        "Please subscribe using the DiggerSafe app on your iOS or Android device.",
+        "Please subscribe using the DiggerSafe app on your device."
         [{ text: "OK" }]
       );
       return;

@@ -11,7 +11,7 @@ import {
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import * as ImagePicker from "expo-image-picker";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import {
@@ -242,7 +242,25 @@ export default function InspectionScreen() {
   };
 
   const handlePhotoCapture = async (checkIndex: number) => {
-    Alert.alert("Photo Evidence", "Photo capture will be available in the next update.");
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Camera Permission Required", "Please enable camera access to attach photo evidence.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      quality: 0.5,
+      base64: false,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const photoUri = result.assets[0].uri;
+      setChecks((prev) => {
+        const updated = [...prev];
+        updated[checkIndex] = { ...updated[checkIndex], photoUri };
+        return updated;
+      });
+    }
   };
 
   // Get checks for current phase

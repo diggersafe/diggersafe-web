@@ -47,10 +47,10 @@ export default function TermsOfServiceScreen() {
 
         <Section title="4. Subscription & Payment" colors={colors}>
           {"\u2022"} Access to DiggerSafe requires an active subscription{"\n"}
-          {"\u2022"} Subscriptions are billed through the Apple App Store or Google Play Store{"\n"}
+          {"\u2022"} Subscriptions are billed through the Apple App Store
           {"\u2022"} Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current period{"\n"}
           {"\u2022"} If your subscription lapses, you retain read-only access to existing records but cannot create new inspections{"\n"}
-          {"\u2022"} Refunds are handled by Apple or Google according to their respective policies
+          {"\u2022"} Refunds are handled by Apple according to their policies.
         </Section>
 
         <Section title="5. User Responsibilities" colors={colors}>
