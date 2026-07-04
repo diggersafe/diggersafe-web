@@ -246,38 +246,29 @@ export default function InspectionScreen() {
   };
 
   const handlePhotoCapture = async (checkIndex: number) => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Camera Permission Required", "Please enable camera access to attach photo evidence.");
-      return;
-    }
+  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  if (status !== "granted") {
+    Alert.alert("Camera Permission Required", "Please enable camera access to attach photo evidence.");
+    return;
+  }
 
-    const result = await ImagePicker.launchCameraAsync({
-      quality: 0.5,
-      base64: false,
+  const result = await ImagePicker.launchCameraAsync({
+    quality: 0.5,
+    base64: true,
+  });
+
+  if (!result.canceled && result.assets && result.assets.length > 0) {
+    const base64 = result.assets[0].base64;
+    const photoUri = base64 ? `data:image/jpeg;base64,${base64}` : undefined;
+
+    setChecks((prev) => {
+      const updated = [...prev];
+      updated[checkIndex] = { ...updated[checkIndex], photoUri };
+      return updated;
     });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const tempUri = result.assets[0].uri;
-      const fileName = `inspection_photo_${Date.now()}.jpg`;
-      const permanentUri = `${FileSystem.documentDirectory}${fileName}`;
-
-       let finalUri = permanentUri;
-      try {
-        await FileSystem.copyAsync({ from: tempUri, to: permanentUri });
-      } catch (e) {
-        Alert.alert("Photo Copy Debug", "Copy failed: " + JSON.stringify(e));
-        finalUri = tempUri;
-      }
-
-    
-      setChecks((prev) => {
-        const updated = [...prev];
-        updated[checkIndex] = { ...updated[checkIndex], photoUri: finalUri };
-        return updated;
-      });
-    }
-  };
+  }
+};
+       
 
   // Get checks for current phase
   const currentPhaseData = INSPECTION_PHASES[currentPhase - 1];

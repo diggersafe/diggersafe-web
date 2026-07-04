@@ -9,15 +9,16 @@ import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { getInspections, INSPECTION_PHASES, type Inspection } from "@/lib/store";
 async function photoToBase64(uri?: string): Promise<string | null> {
-    if (!uri) return null;
-    try {
-      const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
-      return `data:image/jpeg;base64,${base64}`;
-    } catch (e) {
-      console.log("Photo read failed for URI:", uri, "Error:", e);
-      return null;
-    }
+  if (!uri) return null;
+  if (uri.startsWith("data:")) return uri;
+  try {
+    const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+    return `data:image/jpeg;base64,${base64}`;
+  } catch (e: any) {
+    console.log("Photo read failed for URI:", uri, "Error:", e);
+    return null;
   }
+}
 async function generateReportHTML(inspection: Inspection): Promise<string> {
   const dateStr = new Date(inspection.date).toLocaleDateString("en-AU", {
     day: "2-digit", month: "short", year: "numeric",
