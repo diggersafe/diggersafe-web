@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /inspect/
+
+Sitemap: https://diggersafe.com/sitemap.xml
